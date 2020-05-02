@@ -509,6 +509,14 @@ static double calculateRingLength(Ring ring) {
 }
 */
 
+static void printHoles(Ring *holes, int n) {
+	int i;
+	for (i = 0; i < n; i++) {
+		int nVert = (*(holes+i)).nVertexes;
+		printf("%d ", nVert);
+	}
+}
+
 /*
  * R pos
 
@@ -526,9 +534,9 @@ static void commandResume(int pos, Cartography cartography, int n) {
 	Identification id = p.identification;
 	showIdentification(pos, id, 3);
 	printf("\n");
+	printf("%5s%d ", "", p.edge.nVertexes);
+	printHoles(p.holes, p.nHoles);
 	Rectangle boundingBox = p.edge.boundingBox;
-	printf("%9d ", p.edge.nVertexes);
-	// TODO Add holes
 	showRectangle(boundingBox);
 	printf("\n");
 }
