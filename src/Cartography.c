@@ -430,12 +430,24 @@ int nVertexes(Parcel p){
 }
 
 
+int calculateLength (Cartography cartography, int pos, int n, int mode){
+	Identification id = cartography[pos].identification;
+	int count = 1;
+	for(int i = pos+1; i < n && sameIdentification(id, cartography[i].identification, mode); i++)
+		count++;
+	for(int i = pos-1; i >= 0 && sameIdentification(id, cartography[i].identification, mode); i--)
+		count++;
+	return count;
+}
+
+
+
 // M pos
 static void commandMaximum(int pos, Cartography cartography, int n)
 {
 	if( !checkArgs(pos) || !checkPos(pos, n) )
 		return ;
-	int maxPos, max, lenght = 0;
+	int maxPos, max = 0;
 	Identification id = cartography[pos].identification;
 
 	for(maxPos = pos; maxPos > 0 &&
@@ -443,7 +455,6 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 	max = nVertexes(cartography[maxPos]);
 
 	for(int i = maxPos; i < n; i++){
-		lenght++;
 		Parcel p = cartography[i];
 		if(sameIdentification(id, p.identification, 3)){
 			int v = nVertexes(p);
@@ -453,7 +464,7 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 			}
 		} else break;
 	}
-	showParcel(maxPos, cartography[maxPos], lenght);
+	showParcel(maxPos, cartography[maxPos], max);
 }
 
 void maxPos (int * pos, int i, double * prevmax, double m){
@@ -471,16 +482,6 @@ void minPos (int * pos, int i, double *prevmin, double m){
 
 }
 
-int calculateLength (Cartography cartography, int pos, int n, int mode){
-	Identification id = cartography[pos].identification;
-	int count = 1;
-	for(int i = pos+1; i < n && sameIdentification(id, cartography[i].identification, mode); i++)
-		count++;
-	for(int i = pos-1; i > 0 && sameIdentification(id, cartography[i].identification, mode); i--)
-		count++;
-	return count;
-}
-
 static void commandExtremes(Cartography cartography, int n){
 	int north, south, west, east = 0;
 	double xmax = -180, ymax = -90, xmin = 180, ymin = 90;
@@ -492,10 +493,10 @@ static void commandExtremes(Cartography cartography, int n){
 		minPos(&south, i, &ymin, r.bottomRight.lat);
 		minPos(&west, i, &xmin, r.topLeft.lon);
 	}
-	showParcel(north, cartography[north], calculateLength(cartography, north, n, 3));
-	showParcel(east, cartography[east], calculateLength(cartography, east, n, 3));
-	showParcel(south, cartography[south], calculateLength(cartography, south, n, 3));
-	showParcel(west, cartography[west], calculateLength(cartography, west, n, 3));
+	showParcel(north, cartography[north], -'N');
+	showParcel(east, cartography[east], -'E');
+	showParcel(south, cartography[south], -'S');
+	showParcel(west, cartography[west], -'W');
 }
 
 /*
@@ -545,14 +546,18 @@ static void commandTrip(double lat, double lon, int pos, Cartography cartography
 
 }
 
+void showHowMany(int pos, Cartography cartography, int n, int mode){
+	showIdentification(pos, cartography[pos].identification, mode);
+	showValue(calculateLength(cartography, pos, n, mode));
+}
+
 static void commandHowMany(int pos, Cartography cartography, int n) {
 	if( !checkArgs(pos) || !checkPos(pos, n) )
 				return ;
-	//TODO FORMATO PODE ESTAR ERRADO V
-	printf("Freguesia: %d Concelho:%d Distrito: %d \n",
-			calculateLength(cartography, pos, n, 3),
-			calculateLength(cartography, pos, n, 2),
-			calculateLength(cartography, pos, n, 1));
+	showHowMany(pos, cartography, n, 3);
+	showHowMany(pos, cartography, n, 2);
+	showHowMany(pos, cartography, n, 1);
+
 }
 
 static void commandCounties(Cartography cartography, int n){
