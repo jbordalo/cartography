@@ -435,10 +435,10 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 {
 	if( !checkArgs(pos) || !checkPos(pos, n) )
 		return ;
-	int maxPos = pos, max, lenght = 0;
+	int maxPos, max, lenght = 0;
 	Identification id = cartography[pos].identification;
 
-	for(maxPos; maxPos > 0 &&
+	for(maxPos = pos; maxPos > 0 &&
 		sameIdentification(id, cartography[maxPos].identification, 3); maxPos--);
 	max = nVertexes(cartography[maxPos]);
 
@@ -486,10 +486,10 @@ static void commandExtremes(Cartography cartography, int n){
 	double xmax = -180, ymax = -90, xmin = 180, ymin = 90;
 	for (int i = 1; i < n; i++){
 		Ring edge = cartography[i].edge;
-		Rectangle r = calculateBoundingBox(edge.vertexes,edge.nVertexesn);
+		Rectangle r = calculateBoundingBox(edge.vertexes,edge.nVertexes);
 		maxPos(&north, i, &ymax, r.topLeft.lat);
 		maxPos(&east, i, &xmax, r.bottomRight.lon);
-		minPos(&south, i, &ymin, r.bottomRigth.lat);
+		minPos(&south, i, &ymin, r.bottomRight.lat);
 		minPos(&west, i, &xmin, r.topLeft.lon);
 	}
 	showParcel(north, cartography[north], calculateLength(cartography, north, n, 3));
