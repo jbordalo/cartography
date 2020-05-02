@@ -5,6 +5,7 @@ Second LAP practical project (P02).
 
 ### Compiling
 ```
+$ mkdir build, lib
 $ gcc -c src/Cartography.c -o build/Cartography.o
 $ ar rcs lib/libcartography.a build/Cartography.o
 $ gcc src/Main.c -L -lcartography -o bin/Main
@@ -13,7 +14,7 @@ $ gcc src/Main.c -L -lcartography -o bin/Main
 ### Running
 
 ```
-$ .\main
+$ ./src/Main
 ```
 
 ## Authors
