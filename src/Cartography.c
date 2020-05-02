@@ -454,6 +454,10 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 	showParcel(maxPos, cartography[maxPos], lenght);
 }
 
+static void commandExtremes(Cartography cartography, int n){
+
+}
+
 
 void interpreter(Cartography cartography, int n)
 {
