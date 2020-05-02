@@ -167,20 +167,29 @@ static void showRectangle(Rectangle r)
 			r.bottomRight.lat, r.bottomRight.lon);
 }
 
+
 static Rectangle calculateBoundingBox(Coordinates vs[], int n)
 {
-////// FAZER
-	return rect(coord(-9999,-9999), coord(9999,9999));
+	//TODO double max double min instead of 9999 and -9999 ???
+	double xmin, ymin = 9999, xmax, ymax =  -9999;
+	for (int i = 0; i < n; i++){
+		Coordinates c = vs[i];
+		xmin = fminl(xmin, c.lat);
+		xmax = fmaxl(xmax, c.lat);
+		ymin = fminl(ymin, c.lon);
+		ymax = fmaxl(ymax, c.lon);
+	}
+	return rect(coord(xmin,ymax), coord(xmax,ymin));
 }
 
 bool insideRectangle(Coordinates c, Rectangle r)
 {
 	//TODO may want to do this for better readability
-	// Coordinates tl = r.topLeft, br = r.bottomRight
+	// Coordinates tl = r.topLeft, br = r.bottomRight;
 	// return (c.lat >= tl.lat && c.lat <= br.lat
-	// 		&& c.lon <= tl.lon && c.lon >= br.lon)
+	// 		&& c.lon <= tl.lon && c.lon >= br.lon);
 	return (c.lat >= r.topLeft.lat && c.lat <= r.bottomRight.lat
-			&& c.lon <= r.topLeft.lon && c.lon >= r.bottomRight.lon)
+			&& c.lon <= r.topLeft.lon && c.lon >= r.bottomRight.lon);
 }
 
 
