@@ -268,6 +268,17 @@ static void showParcel(int pos, Parcel p, int lenght)
 bool insideParcel(Coordinates c, Parcel p)
 {
 ////// FAZER
+	// A point is inside a parcel if it's inside the edge but outside the holes
+	if (insideRing(c, p.edge)) {
+		int i;
+		for (i = 0; i < p.nHoles; i++) {
+			// If it's inside the hole then it's not inside the parcel
+			if (insideRing(c, p.holes[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
 	return false;
 }
 
