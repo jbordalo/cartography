@@ -471,12 +471,12 @@ void minPos (int * pos, int i, double *prevmin, double m){
 
 }
 
-int calculateLength (Cartography cartography, int pos, int n){
+int calculateLength (Cartography cartography, int pos, int n, int mode){
 	Identification id = cartography[pos].identification;
 	int count = 1;
-	for(int i = pos+1; i < n && sameIdentification(id, cartography[i].identification, 3); i++)
+	for(int i = pos+1; i < n && sameIdentification(id, cartography[i].identification, mode); i++)
 		count++;
-	for(int i = pos-1; i > 0 && sameIdentification(id, cartography[i].identification, 3); i--)
+	for(int i = pos-1; i > 0 && sameIdentification(id, cartography[i].identification, mode); i--)
 		count++;
 	return count;
 }
@@ -492,10 +492,10 @@ static void commandExtremes(Cartography cartography, int n){
 		minPos(&south, i, &ymin, r.bottomRigth.lat);
 		minPos(&west, i, &xmin, r.topLeft.lon);
 	}
-	showParcel(north, cartography[north], calculateLength(cartography, north, n));
-	showParcel(east, cartography[east], calculateLength(cartography, east, n));
-	showParcel(south, cartography[south], calculateLength(cartography, south, n));
-	showParcel(west, cartography[west], calculateLength(cartography, west, n));
+	showParcel(north, cartography[north], calculateLength(cartography, north, n, 3));
+	showParcel(east, cartography[east], calculateLength(cartography, east, n, 3));
+	showParcel(south, cartography[south], calculateLength(cartography, south, n, 3));
+	showParcel(west, cartography[west], calculateLength(cartography, west, n, 3));
 }
 
 /*
@@ -538,7 +538,13 @@ static void commandTrip(double lat, double lon, int pos, Cartography cartography
 }
 
 static void commandHowMany(int pos, Cartography cartography, int n) {
-
+	if( !checkArgs(pos) || !checkPos(pos, n) )
+				return ;
+	//TODO FORMATO PODE ESTAR ERRADO V
+	printf("Freguesia: %d Concelho:%d Distrito: %d \n",
+			calculateLength(cartography, pos, n, 3),
+			calculateLength(cartography, pos, n, 2),
+			calculateLength(cartography, pos, n, 1));
 }
 
 static void commandCounties(Cartography cartography, int n){
