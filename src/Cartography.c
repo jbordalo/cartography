@@ -302,7 +302,7 @@ bool parcelInParcel(Parcel a, Parcel b) {
 		Ring aEdge = a.edge;
 		// Check if a is inside the hole
 		for (j = 0 ; j < aEdge.nVertexes ; j++) {
-			if ( insideRing(aEdge[j], bHole) ) {
+			if ( insideRing(aEdge.vertexes[j], bHole) ) {
 				return true;
 			}
 		}
@@ -460,8 +460,39 @@ static void commandExtremes(Cartography cartography, int n){
 
 }
 
-static void commandResume(int pos, Cartography cartography, int n){
+/*
+static double calculateRingLength(Ring ring) {
+	double length;
+	int i;
+	for (i = 0; i < ring.nVertexes; i++) {
+		length += haversine(ring.vertexes[i], ring.vertexes[ (i + 1) % ring.nVertexes ]);
+	}
+	return length;
+}
+*/
 
+/*
+ * R pos
+
+		Comando Resumo - Dada uma parcela indicada através duma posição no vetor,
+		mostra um resumo dessa parcela. Apresentar: identificação,
+		comprimento do anel exterior (inteiro numa nova linha e alinhado com a
+		identificação que aparece por cima), comprimento dos vários
+		buracos (inteiros separados por um espaço), bounding box do
+		anel exterior (delimitada por chavetas).
+		*/
+static void commandResume(int pos, Cartography cartography, int n) {
+	if( !checkArgs(pos) || !checkPos(pos, n) )
+			return ;
+	Parcel p = cartography[pos];
+	Identification id = p.identification;
+	showIdentification(pos, id, 3);
+	printf("\n");
+	Rectangle boundingBox = p.edge.boundingBox;
+	printf("%9d ", p.edge.nVertexes);
+	// TODO Add holes
+	showRectangle(boundingBox);
+	printf("\n");
 }
 
 static void commandTrip(double lat, double lon, int pos, Cartography cartography, int n) {
