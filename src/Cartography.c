@@ -30,6 +30,9 @@ COMENTÁRIO
 
 #include "Cartography.h"
 
+#define max(a,b)     ((a) > (b) ? (a) : (b))
+#define min(a,b)     ((a) > (b) ? (b) : (a))
+
 /* STRING -------------------------------------- */
 
 static void showStringVector(StringVector sv, int n) {
@@ -167,19 +170,18 @@ static void showRectangle(Rectangle r)
 			r.bottomRight.lat, r.bottomRight.lon);
 }
 
-
 static Rectangle calculateBoundingBox(Coordinates vs[], int n)
 {
-	//TODO double max double min instead of 9999 and -9999 ???
-	double xmin, ymin = 9999, xmax, ymax =  -9999;
-	for (int i = 0; i < n; i++){
+
+	double xmin = 181, xmax = -181, ymin = 91, ymax = -91;
+	for (int i = 0; i < n; i++) {
 		Coordinates c = vs[i];
-		xmin = fminl(xmin, c.lat);
-		xmax = fmaxl(xmax, c.lat);
-		ymin = fminl(ymin, c.lon);
-		ymax = fmaxl(ymax, c.lon);
+		xmin = min(xmin, c.lon);
+		xmax = max(xmax, c.lon);
+		ymin = min(ymin, c.lat);
+		ymax = max(ymax, c.lat);
 	}
-	return rect(coord(xmin,ymax), coord(xmax,ymin));
+	return rect(coord(ymax,xmin), coord(ymin,xmax));
 }
 
 bool insideRectangle(Coordinates c, Rectangle r)
