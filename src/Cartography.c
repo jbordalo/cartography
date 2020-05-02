@@ -543,7 +543,16 @@ static void commandResume(int pos, Cartography cartography, int n) {
 }
 
 static void commandTrip(double lat, double lon, int pos, Cartography cartography, int n) {
-
+	if( !checkArgs(pos) || !checkPos(pos, n)) //TODO check lat and lon
+					return ;
+	Coordinates c = coord(lat, lon);
+	Coordinates * p = cartography[pos].edge.vertexes;
+	int num = cartography[pos].edge.nVertexes;
+	double minDist = haversine(c, *p);
+	for(p++; p < (cartography[pos].edge.vertexes + num); p++){
+		minDist = fmin(minDist, haversine(c, *p));
+	}
+	printf ("%f\n", minDist);
 }
 
 void showHowMany(int pos, Cartography cartography, int n, int mode){
