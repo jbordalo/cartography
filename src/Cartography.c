@@ -18,8 +18,8 @@ COMPILAÇÃO
 
 IDENTIFICAÇÃO DOS AUTORES
 
-  Aluno 1: número1 nome1
-  Aluno 2: número2 nome2
+  Aluno 1: 55075 Jacinta Sousa
+  Aluno 2: 55697 Joao Bordalo
 
 COMENTÁRIO
 
@@ -175,8 +175,12 @@ static Rectangle calculateBoundingBox(Coordinates vs[], int n)
 
 bool insideRectangle(Coordinates c, Rectangle r)
 {
-	////// FAZER
-		return false;
+	//TODO may want to do this for better readability
+	// Coordinates tl = r.topLeft, br = r.bottomRight
+	// return (c.lat >= tl.lat && c.lat <= br.lat
+	// 		&& c.lon <= tl.lon && c.lon >= br.lon)
+	return (c.lat >= r.topLeft.lat && c.lat <= r.bottomRight.lat
+			&& c.lon <= r.topLeft.lon && c.lon >= r.bottomRight.lon)
 }
 
 
