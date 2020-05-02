@@ -462,11 +462,11 @@ static void commandResume(int pos, Cartography cartography, int n){
 
 }
 
-static void commandTrip(double lat, double long, int n, Cartography cartography, int n){
+static void commandTrip(double lat, double lon, int pos, Cartography cartography, int n) {
 
 }
 
-static void commandHowMany(int pos, Cartography cartography, int n){
+static void commandHowMany(int pos, Cartography cartography, int n) {
 
 }
 
@@ -474,23 +474,23 @@ static void commandCounties(Cartography cartography, int n){
 
 }
 
-static void commandDistricts(Cartography cartography, int n){
+static void commandDistricts(Cartography cartography, int n) {
 
 }
 
-static void commandParcel(double lat, double long, Cartography cartography, int n){
+static void commandParcel(double lat, double lon, Cartography cartography, int n) {
 
 }
 
-static void commandAdjacent(int pos, Cartography cartography, int n){
+static void commandAdjacent(int pos, Cartography cartography, int n) {
 
 }
 
-static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n){
+static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n) {
 
 }
 
-static void commandPartition(double dist, Cartography cartography, int n){
+static void commandPartition(double dist, Cartography cartography, int n) {
 
 }
 
