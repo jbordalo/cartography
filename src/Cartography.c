@@ -518,16 +518,6 @@ static void printHoles(Ring *holes, int n) {
 	}
 }
 
-/*
- * R pos
-
-		Comando Resumo - Dada uma parcela indicada através duma posição no vetor,
-		mostra um resumo dessa parcela. Apresentar: identificação,
-		comprimento do anel exterior (inteiro numa nova linha e alinhado com a
-		identificação que aparece por cima), comprimento dos vários
-		buracos (inteiros separados por um espaço), bounding box do
-		anel exterior (delimitada por chavetas).
-		*/
 static void commandResume(int pos, Cartography cartography, int n) {
 	if( !checkArgs(pos) || !checkPos(pos, n) )
 			return ;
@@ -569,12 +559,48 @@ static void commandHowMany(int pos, Cartography cartography, int n) {
 
 }
 
+// TODO type-safety
+
+static int compareCounties(const void *av, const void *bv) {
+	const Parcel *a = av, *b = bv;
+	return strcmp(a->identification.concelho, b->identification.concelho);
+}
+
+static void removeDups(void *av, int n) {
+	Parcel *a = av;
+	int i;
+	for (i = 0; i < n; ++i) {
+		// if (a[i] == a[i+1]) {
+		if (compareCounties(a+i, a+i+1) == 0) {
+			int j;
+			for ( j = i + 1 ; compareCounties(a+j, a+j+1) != 0; j++)
+			//memcpy(a[i], a[i+j+1], sizeof(String));
+			//a[i] = a[i+j+1];
+			memcpy(a+i, a+i+j+1, sizeof(Parcel));
+			i = j;
+		}
+	}
+}
+
 static void commandCounties(Cartography cartography, int n){
+
+	Parcel *counties = malloc(sizeof(Cartography));
+	memcpy(counties, cartography, sizeof(Cartography));
+	// showCartography(counties, n);
+	qsort(counties, n, sizeof(Parcel), compareCounties);
+
+	removeDups(counties, n);
+
+	int i;
+	for (i = 0; i < n; i++) {
+		Parcel p = *(counties + i);
+		printf("%s\n", p.identification.concelho);
+	}
 
 }
 
 static void commandDistricts(Cartography cartography, int n) {
-
+	String *districts;
 }
 
 int inParcel(double lat, double lon, Cartography cartography, int n){

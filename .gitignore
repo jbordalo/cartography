@@ -54,3 +54,5 @@ dkms.conf
 .settings/
 .project
 .cproject
+
+bin/
