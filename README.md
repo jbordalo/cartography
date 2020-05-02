@@ -1,7 +1,7 @@
 # Cartography
 
 Second LAP practical project (P02).
-<br>The aim of this project is to write a C program to work with data from the CAOP database
+<br>The aim of this project is to write a C program to work with data from the [CAOP](http://www.dgterritorio.pt/cartografia_e_geodesia/cartografia/carta_administrativa_oficial_de_portugal_caop/) database
 
 ### Compiling
 ```
@@ -14,7 +14,7 @@ $ gcc src/Main.c -L -lcartography -o bin/Main
 ### Running
 
 ```
-$ ./src/Main
+$ ./bin/Main
 ```
 
 ## Authors
