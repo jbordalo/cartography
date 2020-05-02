@@ -456,8 +456,46 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 	showParcel(maxPos, cartography[maxPos], lenght);
 }
 
-static void commandExtremes(Cartography cartography, int n){
+void maxPos (int * pos, int i, double * prevmax, double m){
+	if(*prevmax < m){
+		*prevmax = m;
+		*pos = i;
+	}
+}
 
+void minPos (int * pos, int i, double *prevmin, double m){
+	if(*prevmin > m){
+		*prevmin = m;
+		*pos = i;
+	}
+
+}
+
+int calculateLength (Cartography cartography, int pos, int n){
+	Identification id = cartography[pos].identification;
+	int count = 1;
+	for(int i = pos+1; i < n && sameIdentification(id, cartography[i].identification, 3); i++)
+		count++;
+	for(int i = pos-1; i > 0 && sameIdentification(id, cartography[i].identification, 3); i--)
+		count++;
+	return count;
+}
+
+static void commandExtremes(Cartography cartography, int n){
+	int north, south, west, east = 0;
+	double xmax = -180, ymax = -90, xmin = 180, ymin = 90;
+	for (int i = 1; i < n; i++){
+		Ring edge = cartography[i].edge;
+		Rectangle r = calculateBoundingBox(edge.vertexes,edge.nVertexesn);
+		maxPos(&north, i, &ymax, r.topLeft.lat);
+		maxPos(&east, i, &xmax, r.bottomRight.lon);
+		minPos(&south, i, &ymin, r.bottomRigth.lat);
+		minPos(&west, i, &xmin, r.topLeft.lon);
+	}
+	showParcel(north, cartography[north], calculateLength(cartography, north, n));
+	showParcel(east, cartography[east], calculateLength(cartography, east, n));
+	showParcel(south, cartography[south], calculateLength(cartography, south, n));
+	showParcel(west, cartography[west], calculateLength(cartography, west, n));
 }
 
 /*
