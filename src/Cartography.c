@@ -458,6 +458,41 @@ static void commandExtremes(Cartography cartography, int n){
 
 }
 
+static void commandResume(int pos, Cartography cartography, int n){
+
+}
+
+static void commandTrip(double lat, double long, int n, Cartography cartography, int n){
+
+}
+
+static void commandHowMany(int pos, Cartography cartography, int n){
+
+}
+
+static void commandCounties(Cartography cartography, int n){
+
+}
+
+static void commandDistricts(Cartography cartography, int n){
+
+}
+
+static void commandParcel(double lat, double long, Cartography cartography, int n){
+
+}
+
+static void commandAdjacent(int pos, Cartography cartography, int n){
+
+}
+
+static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n){
+
+}
+
+static void commandPartition(double dist, Cartography cartography, int n){
+
+}
 
 void interpreter(Cartography cartography, int n)
 {
@@ -478,9 +513,49 @@ void interpreter(Cartography cartography, int n)
 				commandMaximum(arg1, cartography, n);
 				break;
 
+			case 'X': case 'x':
+				commandExtremes(cartography, n);
+				break;
+
+			case 'R': case 'r':
+				commandResume(arg1, cartography, n);
+				break;
+
+			case 'V': case 'v':
+				commandTrip(arg1, arg2, arg3, cartography, n);
+				break;
+
+			case 'Q': case 'q':
+				commandHowMany(arg1, cartography, n);
+				break;
+
+			case 'C': case 'c':
+				commandCounties(cartography, n);
+				break;
+
+			case 'D': case 'd':
+				commandDistricts(cartography, n);
+				break;
+
+			case 'P': case 'p':
+				commandParcel(arg1, arg2, cartography, n);
+				break;
+
+			case 'A': case 'a':
+				commandAdjacent(arg1, cartography, n);
+				break;
+
+			case 'F': case 'f':
+				commandBoundaries(arg1, arg2, cartography, n);
+				break;
+
+			case 'T': case 't':
+				commandPartition(arg1, cartography, n);
+				break;
 			case 'Z': case 'z':	// terminar
 				printf("Fim de execucao! Volte sempre.\n");
 				return;
+
 
 			default:
 				printf("Comando desconhecido: \"%s\"\n", commandLine);
