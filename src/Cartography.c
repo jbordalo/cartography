@@ -584,18 +584,33 @@ static void removeDups(void *av, int n) {
 
 static void commandCounties(Cartography cartography, int n){
 
+	/*
 	Parcel *counties = malloc(sizeof(Cartography));
 	memcpy(counties, cartography, sizeof(Cartography));
 	// showCartography(counties, n);
 	qsort(counties, n, sizeof(Parcel), compareCounties);
-
-	removeDups(counties, n);
+	*/
+	String *counties = malloc(sizeof(String)*n);
+	int p;
+	// TODO can be done better maybe
+	Identification last = cartography[0].identification;
+	memcpy(counties, last.concelho, sizeof(String));
+	for (p = 1; p < n; p++) {
+		Identification current = cartography[p].identification;
+		if (!sameIdentification(current, last, 2)) {
+			last = current;
+			memcpy(counties+p, current.concelho, sizeof(String));
+		}
+	}
 
 	int i;
 	for (i = 0; i < n; i++) {
-		Parcel p = *(counties + i);
-		printf("%s\n", p.identification.concelho);
+		String str = counties[i];
+		printf("%s\n", str);
 	}
+
+	// removeDups(counties, n);
+
 
 }
 
