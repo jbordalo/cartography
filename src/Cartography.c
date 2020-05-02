@@ -291,9 +291,62 @@ bool insideParcel(Coordinates c, Parcel p)
 	return false;
 }
 
+// Tests if Parcel a is inside Parcel b
+bool parcelInParcel(Parcel a, Parcel b) {
+	int i, j;
+	// For each hole in b
+	for (i = 0; i < b.nHoles ; i++) {
+		Ring bHole = b.holes[i];
+		Ring aEdge = a.edge;
+		// Check if a is inside the hole
+		for (j = 0 ; j < aEdge.nVertexes ; j++) {
+			if ( insideRing(aEdge[j], bHole) ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+// Tests if Parcel A is inside Parcel B or the other way around
+bool nestedParcels(Parcel a, Parcel b) {
+	return parcelInParcel(a, b) || parcelInParcel(b, a);
+}
+
+/*
+ * TODO
+ * Only problem with this function is that B may be inside A which means we need to test if
+ *	1) B's edge is inside A for any point (will work for edges touching)
+ *	2) If B's edge is totally inside A then it would be false since it would be a hole
+ *	However it's still adjacent
+ *	3) So we need to check if B's edge is a hole of A
+ *	4) Also need to check if A is a hole of B
+ *	If we assume only one parcel can be inside another then we can use insideRing to simplify this a lot
+ * 	And that's what really happens in this context
+ * 	insideRing would account for a parcel being fully inside the other parcel, no need to
+ * 	check holes individually
+ * */
+
 bool adjacentParcels(Parcel a, Parcel b)
 {
 	////// FAZER
+		/* TODO
+		 * Might be wrong in terms of the holes
+		 * Needs testing
+		 * */
+		// Two parcels are adjacent if they share a vertex
+		Ring aRing = a.edge;
+		// A parcel inside another is adjacent to the former
+		if (nestedParcels(a, b)) {
+			return true;
+		}
+		// Test edges touching
+		int	i;
+		for (i = 0; i < aRing.nVertexes ; i++) {
+			if (insideParcel(aRing.vertexes[i], b)) {
+				return true;
+			}
+		}
 		return false;
 }
 
