@@ -190,8 +190,8 @@ bool insideRectangle(Coordinates c, Rectangle r)
 	// Coordinates tl = r.topLeft, br = r.bottomRight;
 	// return (c.lat >= tl.lat && c.lat <= br.lat
 	// 		&& c.lon <= tl.lon && c.lon >= br.lon);
-	return (c.lat >= r.topLeft.lat && c.lat <= r.bottomRight.lat
-			&& c.lon <= r.topLeft.lon && c.lon >= r.bottomRight.lon);
+	return (c.lat <= r.topLeft.lat && c.lat >= r.bottomRight.lat
+			&& c.lon >= r.topLeft.lon && c.lon <= r.bottomRight.lon);
 }
 
 
@@ -577,8 +577,28 @@ static void commandDistricts(Cartography cartography, int n) {
 
 }
 
-static void commandParcel(double lat, double lon, Cartography cartography, int n) {
+int inParcel(double lat, double lon, Cartography cartography, int n){
+	Coordinates c = coord(lat, lon);
+		for(int i = 0; i < n ; i++){
+			Ring r = cartography[i].edge;
+			if(insideRectangle(c, calculateBoundingBox(r.vertexes, r.nVertexes))){
+				if(insideParcel(c, cartography[i])){
+					return i;
+				}
+			}
+		}
+		return -1;
+}
 
+static void commandParcel(double lat, double lon, Cartography cartography, int n) {
+	//TODO check lat & lon
+	int res = inParcel(lat, lon, cartography, n);
+	if(res == -1){
+		printf("FORA DO MAPA\n");
+	} else {
+		showIdentification(res, cartography[res].identification, 3);
+		printf("\n");
+	}
 }
 
 static void commandAdjacent(int pos, Cartography cartography, int n) {
