@@ -224,6 +224,14 @@ bool insideRing(Coordinates c, Ring r)
 bool adjacentRings(Ring a, Ring b)
 {
 ////// FAZER
+	// Two Rings are adjacent if they share vertexes
+	int i;
+	for (i = 0; i < a.nVertexes; i++) {
+		// Assuming the border counts in insideRing
+		if (insideRing(a.vertexes[i], b)) {
+			return true;
+		}
+	}
 	return false;
 }
 
