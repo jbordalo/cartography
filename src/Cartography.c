@@ -419,13 +419,41 @@ static void commandListCartography(Cartography cartography, int n)
 	showCartography(cartography, n);
 }
 
+int nVertexes(Parcel p){
+	int n = 0;
+	n+= p.edge.nVertexes;
+	for(int i = 0; i < p.nHoles; i++)
+		n+=p.holes[i].nVertexes;
+	return n;
+}
+
+
 // M pos
 static void commandMaximum(int pos, Cartography cartography, int n)
 {
 	if( !checkArgs(pos) || !checkPos(pos, n) )
-		return;
-	////// FAZER
+		return ;
+	int maxPos = pos, max, lenght = 0;
+	Identification id = cartography[pos].identification;
+
+	for(maxPos; maxPos > 0 &&
+		sameIdentification(id, cartography[maxPos].identification, 3); maxPos--);
+	max = nVertexes(cartography[maxPos]);
+
+	for(int i = maxPos; i < n; i++){
+		lenght++;
+		Parcel p = cartography[i];
+		if(sameIdentification(id, p.identification, 3)){
+			int v = nVertexes(p);
+			if(v > max){
+				max = v;
+				maxPos = i;
+			}
+		} else break;
+	}
+	showParcel(maxPos, cartography[maxPos], lenght);
 }
+
 
 void interpreter(Cartography cartography, int n)
 {
