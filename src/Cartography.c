@@ -30,8 +30,8 @@ COMENTÁRIO
 
 #include "Cartography.h"
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) > (b) ? (b) : (a))
+//#define max(a, b) ((a) > (b) ? (a) : (b))
+//#define min(a, b) ((a) > (b) ? (b) : (a))
 
 /* STRING -------------------------------------- */
 
@@ -173,10 +173,10 @@ static Rectangle calculateBoundingBox(Coordinates vs[], int n)
 	for (int i = 0; i < n; i++)
 	{
 		Coordinates c = vs[i];
-		xmin = min(xmin, c.lon);
-		xmax = max(xmax, c.lon);
-		ymin = min(ymin, c.lat);
-		ymax = max(ymax, c.lat);
+		xmin = fmin(xmin, c.lon);
+		xmax = fmax(xmax, c.lon);
+		ymin = fmin(ymin, c.lat);
+		ymax = fmax(ymax, c.lat);
 	}
 	return rect(coord(ymax, xmin), coord(ymin, xmax));
 }
