@@ -113,7 +113,7 @@ typedef Parcel *Cartography;	// Mapa - uma coleção de parcelas
 typedef Parcel Cartography[MAX_PARCELS];	// Mapa - uma coleção de parcelas
 #endif
 
-int loadCartography(String fileName, Cartography cartography);
+int loadCartography(String fileName, Cartography *cartography);
 void showCartography(Cartography cartography, int n);
 
 

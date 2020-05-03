@@ -363,19 +363,18 @@ bool adjacentParcels(Parcel a, Parcel b)
 
 /* CARTOGRAPHY -------------------------------------- */
 
-int loadCartography(String fileName, Cartography cartography)
+int loadCartography(String fileName, Cartography *cartography)
 {
 	FILE *f;
 	int i;
 	f = fopen(fileName, "r");
-	if (f == NULL)
+	if( f == NULL )
 		error("Impossivel abrir ficheiro");
 	int n = readInt(f);
-	if (n > MAX_PARCELS)
+	if( n > MAX_PARCELS )
 		error("Demasiadas parcelas no ficheiro");
-	for (i = 0; i < n; i++)
-	{
-		cartography[i] = readParcel(f);
+	for( i = 0 ; i < n ; i++ ) {
+		(*cartography)[i] = readParcel(f);
 	}
 	fclose(f);
 	return n;
