@@ -295,18 +295,19 @@ bool insideParcel(Coordinates c, Parcel p)
 }
 
 // Tests if Parcel a is inside Parcel b
-bool parcelInParcel(Parcel a, Parcel b)
+static bool parcelInParcel(Parcel a, Parcel b)
 {
 	int i, j;
+	Ring aEdge = a.edge;
 	// For each hole in b
 	for (i = 0; i < b.nHoles; i++)
 	{
 		Ring bHole = b.holes[i];
-		Ring aEdge = a.edge;
 		// Check if a is inside the hole
 		for (j = 0; j < aEdge.nVertexes; j++)
 		{
-			if (insideRing(aEdge.vertexes[j], bHole))
+			//if (insideRing(aEdge.vertexes[j], bHole))
+			if (adjacentRings(aEdge, bHole))
 			{
 				return true;
 			}
@@ -316,7 +317,7 @@ bool parcelInParcel(Parcel a, Parcel b)
 }
 
 // Tests if Parcel A is inside Parcel B or the other way around
-bool nestedParcels(Parcel a, Parcel b)
+static bool nestedParcels(Parcel a, Parcel b)
 {
 	return parcelInParcel(a, b) || parcelInParcel(b, a);
 }
@@ -345,10 +346,12 @@ bool adjacentParcels(Parcel a, Parcel b)
 	// Two parcels are adjacent if they share a vertex
 	Ring aRing = a.edge;
 	// A parcel inside another is adjacent to the former
-	if (nestedParcels(a, b))
+	// TODO NESTEDPARCELS IS WRONG AND SEGFAULTING
+	/*if (nestedParcels(a, b))
 	{
 		return true;
 	}
+	*/
 	// Test edges touching
 	int i;
 	for (i = 0; i < aRing.nVertexes; i++)
@@ -691,6 +694,21 @@ static void commandParcel(double lat, double lon, Cartography cartography, int n
 
 static void commandAdjacent(int pos, Cartography cartography, int n)
 {
+	if (!checkArgs(pos) || !checkPos(pos, n))
+		return ;
+	Parcel p = cartography[pos];
+	//	Parcel *adjacents;
+	int i;
+	for (i = 0; i < n; i++) {
+		// TODO CHANGE ADJACENTPARCELS TO NOT RECOGNIZE ITSELF
+		// PROBABLY DON'T GO OVER EVERY PARCEL
+		if (!sameIdentification(p.identification, cartography[i].identification, 3)
+				&& adjacentParcels(p, cartography[i])) {
+			showIdentification(i, cartography[i].identification, 3);
+			printf("\n");
+		}
+	}
+
 }
 
 static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
