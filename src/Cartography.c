@@ -293,7 +293,7 @@ bool insideParcel(Coordinates c, Parcel p)
 	}
 	return false;
 }
-
+/*
 // Tests if Parcel a is inside Parcel b
 static bool parcelInParcel(Parcel a, Parcel b)
 {
@@ -315,13 +315,37 @@ static bool parcelInParcel(Parcel a, Parcel b)
 	}
 	return false;
 }
+*/
 
 // Tests if Parcel A is inside Parcel B or the other way around
+/*
 static bool nestedParcels(Parcel a, Parcel b)
 {
 	return parcelInParcel(a, b) || parcelInParcel(b, a);
 }
+*/
+/*
+static bool nestedParcels(Parcel a, Parcel b)
+{
+	// It suffices to check if one point of A is inside parcel b
 
+	/*
+	for (int i = 0; i < a.edge.nVertexes; i++) {
+		if (insideParcel(a.edge.vertexes[i])) {
+			return true;
+		}
+	}
+	*
+	if (insideParcel(a.edge.vertexes[0], b)) {
+		return true;
+	}
+	if (insideParcel(b.edge.vertexes[0], a)) {
+		return true;
+	}
+	return false;
+	// return parcelInParcel(a, b) || parcelInParcel(b, a);
+}
+*/
 /*
  * TODO
  * Only problem with this function is that B may be inside A which means we need to test if
@@ -344,15 +368,16 @@ bool adjacentParcels(Parcel a, Parcel b)
 		 * Needs testing
 		 * */
 	// Two parcels are adjacent if they share a vertex
-	Ring aRing = a.edge;
+	// Ring aRing = a.edge;
 	// A parcel inside another is adjacent to the former
 	// TODO NESTEDPARCELS IS WRONG AND SEGFAULTING
 	/*if (nestedParcels(a, b))
 	{
 		return true;
-	}
-	*/
+	}*/
+
 	// Test edges touching
+	/*
 	int i;
 	for (i = 0; i < aRing.nVertexes; i++)
 	{
@@ -360,6 +385,16 @@ bool adjacentParcels(Parcel a, Parcel b)
 		{
 			return true;
 		}
+	}
+	*/
+	if (adjacentRings(a.edge, b.edge)) {
+		return true;
+	}
+	if (insideParcel(a.edge.vertexes[0], b)) {
+		return true;
+	}
+	if (insideParcel(b.edge.vertexes[0], a)) {
+		return true;
 	}
 	return false;
 }
