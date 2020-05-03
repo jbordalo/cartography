@@ -652,22 +652,46 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 {
 	if (!checkArgs(pos) || !checkPos(pos, n))
 		return ;
+
 	Parcel p = cartography[pos];
+	int emptyFlag = 1;
 	int i;
 	for (i = 0; i < n; i++) {
-		// TODO CHANGE ADJACENTPARCELS TO NOT RECOGNIZE ITSELF
+		// TODO
 		// PROBABLY DON'T GO OVER EVERY PARCEL <--------------
 		if (!sameIdentification(p.identification, cartography[i].identification, 3)
 				&& adjacentParcels(p, cartography[i])) {
+			emptyFlag = 0;
 			showIdentification(i, cartography[i].identification, 3);
 			printf("\n");
 		}
+	}
+	if (emptyFlag) {
+		printf("NAO HA ADJACENCIAS\n");
 	}
 
 }
 
 static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
 {
+	/*
+	Parcel p = cartography[pos];
+	Parcel *adj = malloc(n*sizeof(Parcel));
+	int count = 0;
+	int i;
+	for (i = 0; i < n; i++) {
+		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
+		if (!sameIdentification(p.identification, cartography[i].identification, 3)
+				&& adjacentParcels(p, cartography[i])) {
+
+			adj = malloc(sizeof(Parcel));
+			Parcel *add = &cartography[i];
+			memcpy(adj++, add, sizeof(Parcel));
+			// adj++;
+			count++;
+		}
+	}
+	*/
 }
 
 static void commandPartition(double dist, Cartography cartography, int n)
