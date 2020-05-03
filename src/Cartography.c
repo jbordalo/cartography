@@ -293,110 +293,30 @@ bool insideParcel(Coordinates c, Parcel p)
 	}
 	return false;
 }
-/*
-// Tests if Parcel a is inside Parcel b
-static bool parcelInParcel(Parcel a, Parcel b)
-{
-	int i, j;
-	Ring aEdge = a.edge;
-	// For each hole in b
-	for (i = 0; i < b.nHoles; i++)
-	{
-		Ring bHole = b.holes[i];
-		// Check if a is inside the hole
-		for (j = 0; j < aEdge.nVertexes; j++)
-		{
-			//if (insideRing(aEdge.vertexes[j], bHole))
-			if (adjacentRings(aEdge, bHole))
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-*/
 
-// Tests if Parcel A is inside Parcel B or the other way around
-/*
-static bool nestedParcels(Parcel a, Parcel b)
-{
-	return parcelInParcel(a, b) || parcelInParcel(b, a);
-}
-*/
-/*
-static bool nestedParcels(Parcel a, Parcel b)
-{
-	// It suffices to check if one point of A is inside parcel b
-
-	/*
-	for (int i = 0; i < a.edge.nVertexes; i++) {
-		if (insideParcel(a.edge.vertexes[i])) {
+static bool parcelInsideParcel(Parcel *a, Parcel *b) {
+	int i;
+	for ( i = 0; i < b->nHoles ; i++) {
+		if (adjacentRings(a->edge, b->holes[i])) {
 			return true;
 		}
 	}
-	*
-	if (insideParcel(a.edge.vertexes[0], b)) {
-		return true;
-	}
-	if (insideParcel(b.edge.vertexes[0], a)) {
-		return true;
-	}
 	return false;
-	// return parcelInParcel(a, b) || parcelInParcel(b, a);
 }
-*/
-/*
- * TODO
- * Only problem with this function is that B may be inside A which means we need to test if
- *	1) B's edge is inside A for any point (will work for edges touching)
- *	2) If B's edge is totally inside A then it would be false since it would be a hole
- *	However it's still adjacent
- *	3) So we need to check if B's edge is a hole of A
- *	4) Also need to check if A is a hole of B
- *	If we assume only one parcel can be inside another then we can use insideRing to simplify this a lot
- * 	And that's what really happens in this context
- * 	insideRing would account for a parcel being fully inside the other parcel, no need to
- * 	check holes individually
- * */
+
+static bool nestedParcels(Parcel *a, Parcel *b) {
+	return parcelInsideParcel(a, b) || parcelInsideParcel(b, a);
+}
 
 bool adjacentParcels(Parcel a, Parcel b)
 {
 	////// FAZER
-	/* TODO
-		 * Might be wrong in terms of the holes
-		 * Needs testing
-		 * */
-	// Two parcels are adjacent if they share a vertex
-	// Ring aRing = a.edge;
-	// A parcel inside another is adjacent to the former
-	// TODO NESTEDPARCELS IS WRONG AND SEGFAULTING
-	/*if (nestedParcels(a, b))
-	{
-		return true;
-	}*/
-
-	// Test edges touching
-	/*
-	int i;
-	for (i = 0; i < aRing.nVertexes; i++)
-	{
-		if (insideParcel(aRing.vertexes[i], b))
-		{
-			return true;
-		}
-	}
-	*/
 	if (adjacentRings(a.edge, b.edge)) {
 		return true;
 	}
-	if (insideParcel(a.edge.vertexes[0], b)) {
-		return true;
-	}
-	if (insideParcel(b.edge.vertexes[0], a)) {
-		return true;
-	}
-	return false;
+
+	return nestedParcels(&a, &b);
+
 }
 
 /* CARTOGRAPHY -------------------------------------- */
@@ -700,6 +620,7 @@ int inParcel(double lat, double lon, Cartography cartography, int n)
 	Coordinates c = coord(lat, lon);
 	for (int i = 0; i < n; i++)
 	{
+		// TODO calculatBoundingBox
 		Ring r = cartography[i].edge;
 		if (insideRectangle(c, calculateBoundingBox(r.vertexes, r.nVertexes)))
 		{
@@ -732,11 +653,10 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	if (!checkArgs(pos) || !checkPos(pos, n))
 		return ;
 	Parcel p = cartography[pos];
-	//	Parcel *adjacents;
 	int i;
 	for (i = 0; i < n; i++) {
 		// TODO CHANGE ADJACENTPARCELS TO NOT RECOGNIZE ITSELF
-		// PROBABLY DON'T GO OVER EVERY PARCEL
+		// PROBABLY DON'T GO OVER EVERY PARCEL <--------------
 		if (!sameIdentification(p.identification, cartography[i].identification, 3)
 				&& adjacentParcels(p, cartography[i])) {
 			showIdentification(i, cartography[i].identification, 3);
