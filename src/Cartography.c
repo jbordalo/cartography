@@ -345,7 +345,7 @@ static int findLast(Cartography cartography, int n, int j, Identification id, in
 		if (!sameIdentification(cartography[j].identification, id, idNumZ))
 			return j - 1;
 	}
-	return n;
+	return n-1;
 }
 
 void showCartography(Cartography cartography, int n)
