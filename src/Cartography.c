@@ -590,6 +590,8 @@ static void commandCounties(Cartography cartography, int n){
 	// showCartography(counties, n);
 	qsort(counties, n, sizeof(Parcel), compareCounties);
 	*/
+
+	// N*sizeof(string) is kinda overkill you can dynamically alocate on the for for less waste
 	String *counties = malloc(sizeof(String)*n);
 	int p;
 	// TODO can be done better maybe
@@ -599,20 +601,40 @@ static void commandCounties(Cartography cartography, int n){
 		Identification current = cartography[p].identification;
 		if (!sameIdentification(current, last, 2)) {
 			last = current;
-			memcpy(counties+p, current.concelho, sizeof(String));
+			//not counties + p but counties ++
+			memcpy(counties++, current.concelho, sizeof(String));
 		}
 	}
 
 	int i;
+	//not n, n is the count of all the elements (including repeated ones)
+	//this is the reason of the seg fault
 	for (i = 0; i < n; i++) {
 		String str = counties[i];
 		printf("%s\n", str);
 	}
+	//free(counties); we <3 memory
 
 	// removeDups(counties, n);
 
 
 }
+
+//command Counties TODO
+static void c (Cartography cartography, int n){
+	Parcel * counties = memcpy(malloc(n*sizeof(Parcel)), cartography, n*sizeof(Parcel));
+	qsort(counties, n, sizeof(Parcel), compareCounties);
+	Parcel new = *counties;
+	printf("%s\n", new.identification.concelho);
+	for(int i = 0 ; i < n; i++){
+		if(compareCounties(&new, x+i) != 0){
+			new = *(x+i);
+			printf("%s\n", new.identification.concelho);
+		}
+	}
+	free(counties);
+}
+
 
 static void commandDistricts(Cartography cartography, int n) {
 	String *districts;
