@@ -671,6 +671,27 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 
 }
 
+static void generateAdjacencies(Parcel *initial, Parcel *cartography, int n, Parcel *adj, int *countReturn) {
+		adj = malloc(n*sizeof(Parcel));
+
+		// int count = 0;
+		int i;
+		for (i = 0; i < n; i++) {
+			if (!sameIdentification(initial->identification, cartography[i].identification, 3)
+					&& adjacentParcels(*initial, cartography[i]))
+			{
+
+				memcpy(adj, &cartography[i], sizeof(Parcel));
+
+				adj++;
+				(*countReturn)++;
+			}
+		}
+
+		// adj -= count;
+		// *countReturn = count;
+}
+
 static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
 {
 	if (!checkArgs(pos1) || !checkPos(pos1, n))
@@ -679,26 +700,9 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 				return ;
 
 	Parcel initial = cartography[pos1];
-	Parcel *adj = malloc(n*sizeof(Parcel));
-
-	int count = 0;
-	int i;
-	for (i = 0; i < n; i++) {
-		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
-		if (!sameIdentification(initial.identification, cartography[i].identification, 3)
-				&& adjacentParcels(initial, cartography[i]))
-		{
-			// adj = malloc(sizeof(Parcel));
-			// Parcel *add = &cartography[i];
-			memcpy(adj, &cartography[i], sizeof(Parcel));
-
-			// adj = memcpy(malloc(sizeof(Parcel)), &cartography[i], sizeof(Parcel));
-
-			adj++;
-			count++;
-		}
-	}
-
+	Parcel *adj;
+	int count;
+	generateAdjacencies(&initial, cartography, n, adj, &count);
 	adj -= count;
 	for(int j = 0; j < count ; j++) {
 		showIdentification(-1, (adj+j)->identification, 3);
