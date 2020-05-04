@@ -657,8 +657,7 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	int emptyFlag = 1;
 	int i;
 	for (i = 0; i < n; i++) {
-		// TODO
-		// PROBABLY DON'T GO OVER EVERY PARCEL <--------------
+		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
 		if (!sameIdentification(p.identification, cartography[i].identification, 3)
 				&& adjacentParcels(p, cartography[i])) {
 			emptyFlag = 0;
@@ -674,24 +673,38 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 
 static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
 {
-	/*
-	Parcel p = cartography[pos];
+	if (!checkArgs(pos1) || !checkPos(pos1, n))
+			return ;
+	if (!checkArgs(pos2) || !checkPos(pos2, n))
+				return ;
+
+	Parcel initial = cartography[pos1];
 	Parcel *adj = malloc(n*sizeof(Parcel));
+
 	int count = 0;
 	int i;
 	for (i = 0; i < n; i++) {
 		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
-		if (!sameIdentification(p.identification, cartography[i].identification, 3)
-				&& adjacentParcels(p, cartography[i])) {
+		if (!sameIdentification(initial.identification, cartography[i].identification, 3)
+				&& adjacentParcels(initial, cartography[i]))
+		{
+			// adj = malloc(sizeof(Parcel));
+			// Parcel *add = &cartography[i];
+			memcpy(adj, &cartography[i], sizeof(Parcel));
 
-			adj = malloc(sizeof(Parcel));
-			Parcel *add = &cartography[i];
-			memcpy(adj++, add, sizeof(Parcel));
-			// adj++;
+			// adj = memcpy(malloc(sizeof(Parcel)), &cartography[i], sizeof(Parcel));
+
+			adj++;
 			count++;
 		}
 	}
-	*/
+
+	adj -= count;
+	for(int j = 0; j < count ; j++) {
+		showIdentification(-1, (adj+j)->identification, 3);
+		printf("\n");
+	}
+
 }
 
 static void commandPartition(double dist, Cartography cartography, int n)
