@@ -679,6 +679,7 @@ static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, 
 		for (i = 0; i < n; i++) {
 			if (!sameIdentification(initial.identification, cartography[i].identification, 3)
 					&& adjacentParcels(initial, cartography[i]))
+			// TODO f152 153 CRASHED IN THIS adjacentParcels FIRST ITERATION
 			{
 
 				memcpy(adj, &cartography[i], sizeof(Parcel));
@@ -689,22 +690,76 @@ static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, 
 		}
 }
 
+static bool discovered(Parcel *a, Parcel *v, int size) {
+	for (int i = 0; i < size ; i++) {
+		Parcel current = *(v+i);
+		if (sameIdentification((*a).identification, current.identification, 3)) {
+			printf("Has been discovered\n");
+			return true;
+		}
+	}
+	return false;
+}
+
 static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
 {
 	if (!checkArgs(pos1) || !checkPos(pos1, n) || !checkArgs(pos2) || !checkPos(pos2, n))
 			return ;
 
+	// BFS
 
-	Parcel initial = cartography[pos1];
-	Parcel *adj = malloc(n*sizeof(Parcel));
-	int count = 0;
-	generateAdjacencies(&initial, cartography, n, adj, &count);
+	// Define start and goal
+	Parcel start = cartography[pos1];
+	Parcel goal = cartography[pos2];
 
+	Parcel *visited = malloc(n*sizeof(Parcel));
+	int visits = 0;
+
+	// Make the queue
+	Parcel *queue = malloc(n*sizeof(Parcel));
+	int qq = 0;
+
+	queue[qq++] = start;
+	visited[visits++] = start;
+
+	printf("%d\n", discovered(&start, visited, visits));
+
+	while(qq!=0) {
+
+		Parcel v = queue[qq-1];
+		printf("v: %s\n", v.identification.freguesia);
+
+		if (sameIdentification(v.identification, goal.identification, 3)) {
+			printf("Goal found\n");
+			return ;
+		} else {
+			printf("Goal not found\n");
+		}
+
+		Parcel *adj = malloc(n*sizeof(Parcel));
+		printf("Allocating adjacencies\n");
+
+		int count = 0;
+		printf("Getting neighbors\n");
+		generateAdjacencies(&v, cartography, n, adj, &count);
+		printf("Got neighbors\n");
+		for (int j = 0 ; j < count; j++) {
+			if (!discovered(adj+j, visited, visits)) {
+				printf("Not discovered\n");
+				visited[visits++] = *(adj+j);
+				queue[qq++] = *(adj+j);
+			}
+		}
+		free(adj);
+	}
+
+	/*
 	for(int j = 0; j < count ; j++) {
 		showIdentification(-1, (adj+j)->identification, 3);
 		printf("\n");
 	}
-	free(adj);
+	*/
+//	free(path);
 }
 
 static void commandPartition(double dist, Cartography cartography, int n)
