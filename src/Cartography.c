@@ -671,15 +671,16 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 
 }
 
-static void generateAdjacencies(Parcel *initial, Parcel *cartography, int n, Parcel *adj, int *countReturn) {
-		adj = malloc(n*sizeof(Parcel));
-
+static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, Parcel *adj, int *countReturn) {
+		// adj = malloc(n*sizeof(Parcel));
+		Parcel initial = *parcel;
 		// int count = 0;
 		int i;
 		for (i = 0; i < n; i++) {
-			if (!sameIdentification(initial->identification, cartography[i].identification, 3)
-					&& adjacentParcels(*initial, cartography[i]))
+			if (!sameIdentification(initial.identification, cartography[i].identification, 3)
+					&& adjacentParcels(initial, cartography[i]))
 			{
+				printf("Copying: %s\n", initial.identification.concelho);
 
 				memcpy(adj, &cartography[i], sizeof(Parcel));
 
@@ -687,7 +688,7 @@ static void generateAdjacencies(Parcel *initial, Parcel *cartography, int n, Par
 				(*countReturn)++;
 			}
 		}
-
+		printf("Concelho: %s\n", (adj-*countReturn)->identification.concelho);
 		// adj -= count;
 		// *countReturn = count;
 }
@@ -700,15 +701,27 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 				return ;
 
 	Parcel initial = cartography[pos1];
-	Parcel *adj;
+	// TODO if malloc wasn't here was giving segfault
+	Parcel *adj = malloc(n*sizeof(Parcel));
 	int count;
+	printf("Before generateAdjacencies\n");
 	generateAdjacencies(&initial, cartography, n, adj, &count);
-	adj -= count;
+	printf("After generateAdjacencies\n");
+
+	// ACCESSING ADJ IS SEGFAULTING
+	printf("0: %s\n", (*(adj)).identification.concelho);
+	printf("0: %s\n", adj->identification.concelho);
+	//printf("\n0: %s\n", adj[0].identification.concelho);
+	printf("Count = %d\n", count);
+
+	// TODO adj -= count segfaults but we can access without it
+	// adj -= count;
+	// printf("\n0: %s\n", (adj)->identification.concelho);
 	for(int j = 0; j < count ; j++) {
 		showIdentification(-1, (adj+j)->identification, 3);
 		printf("\n");
 	}
-
+	free(adj);
 }
 
 static void commandPartition(double dist, Cartography cartography, int n)
