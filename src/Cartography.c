@@ -719,6 +719,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 	Parcel *queue = malloc(n*sizeof(Parcel));
 	int qq = 0;
 
+	queue[qq++] = start;
 	visited[visits++] = start;
 
 	printf("%d\n", discovered(&start, visited, visits));
