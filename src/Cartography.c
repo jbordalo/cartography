@@ -676,6 +676,7 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	}
 }
 
+/*
 static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, Parcel *adj, int *countReturn) {
 
 		Parcel initial = *parcel;
@@ -694,7 +695,8 @@ static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, 
 			}
 		}
 }
-
+*/
+/*
 static bool discovered(Parcel *a, Parcel *v, int size) {
 	for (int i = 0; i < size ; i++) {
 		Parcel current = *(v+i);
@@ -705,15 +707,9 @@ static bool discovered(Parcel *a, Parcel *v, int size) {
 	}
 	return false;
 }
-
-/*
-typedef struct Node {
-    Parcel parcel;
-    struct Node *next;
-} Node, *Queue;
 */
-
-static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
+/*
+static void commandoundaries(int pos1, int pos2, Cartography cartography, int n)
 {
 	if (!checkArgs(pos1) || !checkPos(pos1, n) || !checkArgs(pos2) || !checkPos(pos2, n))
 			return ;
@@ -774,14 +770,68 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 		free(adj);
 	}
 
-	/*
+	*
 	for(int j = 0; j < count ; j++) {
 		showIdentification(-1, (adj+j)->identification, 3);
 		printf("\n");
 	}
-	*/
+	*
 }
+*/
 
+static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
+{
+	if (!checkArgs(pos1) || !checkPos(pos1, n) || !checkArgs(pos2) || !checkPos(pos2, n))
+			return ;
+
+	if (pos1 == pos2) {
+		printf("0\n");
+		return ;
+	}
+
+	// BFS
+	int queue[n];
+	int add = 0, remove = 0;
+	queue[add++] = pos1;
+
+	int distances[n];
+	memset(distances, -1, n*sizeof(int));
+	distances[pos1] = 0;
+
+	// Make the queue
+
+	while(add != remove) {
+
+		int v = queue[remove++];
+
+		// For each neighbor
+		for (int i = 0 ; i < n ; i++) {
+			// If adjacent
+			if (!sameIdentification(cartography[v].identification, cartography[i].identification, 3)
+					&& adjacentParcels(cartography[v], cartography[i]))
+			{
+
+				// Found it
+				if (sameIdentification(cartography[i].identification, cartography[pos2].identification, 3)) {
+					printf("%d\n", distances[v] + 1);
+					return ;
+				}
+
+				if (distances[i] == -1) {
+					distances[i] = 1 + distances[v];
+					queue[add++] = i;
+				}
+			}
+		}
+	}
+
+	if (distances[pos2] == -1) {
+		printf("NAO HA CAMINHO\n");
+	} else {
+		printf("Goal: %d\n", distances[pos2]);
+	}
+
+}
 
 static void part(double dist, Cartography cartography, int * pos, int n){
 	int far [n];
