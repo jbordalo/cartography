@@ -231,7 +231,7 @@ bool insideRing(Coordinates c, Ring r)
 bool adjacentRings(Ring a, Ring b)
 {
 	////// FAZER
-	// Two Rings are adjacent if they share vertexes
+	// Two Rings are adjacent if they share any vertexes
 
 	int i;
 	int j;
@@ -312,14 +312,14 @@ static bool nestedParcels(Parcel *a, Parcel *b) {
 	return parcelInsideParcel(a, b) || parcelInsideParcel(b, a);
 }
 
-bool adjacentParcels(Parcel *a, Parcel *b)
+bool adjacentParcels(Parcel a, Parcel b)
 {
 	////// FAZER
-	if (adjacentRings(a->edge, b->edge)) {
+	if (adjacentRings(a.edge, b.edge)) {
 		return true;
 	}
 
-	return nestedParcels(a, b);
+	return nestedParcels(&a, &b);
 
 }
 
@@ -557,6 +557,7 @@ static int compareCounties(const void *av, const void *bv)
 	return strcmp(a->identification.concelho, b->identification.concelho);
 }
 
+
 static void commandCounties(Cartography cartography, int n) {
 	// Allocate size for the copy
 	Parcel *counties = malloc(sizeof(Parcel) * n);
@@ -574,6 +575,7 @@ static void commandCounties(Cartography cartography, int n) {
 	}
 
 	free(counties);
+
 }
 
 /* VERY WELL WRITTEN AND I READ IT WITH GREAT ATTENTION, <3 YOU
@@ -663,7 +665,7 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	for (i = 0; i < n; i++) {
 		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
 		if (!sameIdentification(p.identification, cartography[i].identification, 3)
-				&& adjacentParcels(&p, &cartography[i])) {
+				&& adjacentParcels(p, cartography[i])) {
 			emptyFlag = 0;
 			showIdentification(i, cartography[i].identification, 3);
 			printf("\n");
@@ -672,7 +674,6 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	if (emptyFlag) {
 		printf("NAO HA ADJACENCIAS\n");
 	}
-
 }
 
 static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, Parcel *adj, int *countReturn) {
@@ -682,8 +683,8 @@ static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, 
 		int i;
 		for (i = 0; i < n; i++) {
 			if (!sameIdentification(initial.identification, cartography[i].identification, 3)
-					&& adjacentParcels(&initial, &cartography[i]))
-			// TODO f152 153 CRASHED IN THIS adjacentParcels FIRST ITERATION
+					&& adjacentParcels(initial, cartography[i]))
+			// TODO f 152 153 CRASHED IN THIS adjacentParcels FIRST ITERATION
 			{
 
 				memcpy(adj, &cartography[i], sizeof(Parcel));
@@ -705,6 +706,13 @@ static bool discovered(Parcel *a, Parcel *v, int size) {
 	return false;
 }
 
+/*
+typedef struct Node {
+    Parcel parcel;
+    struct Node *next;
+} Node, *Queue;
+*/
+
 static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
 {
 	if (!checkArgs(pos1) || !checkPos(pos1, n) || !checkArgs(pos2) || !checkPos(pos2, n))
@@ -721,33 +729,32 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 
 	// Make the queue
 	Parcel *queue = malloc(n*sizeof(Parcel));
-	int qq = 0;
-
-	queue[qq++] = start;
+	// int rear, front = 0;
+	int add = 0, remove = 0;
+	queue[add++] = start;
 	visited[visits++] = start;
 
 	printf("%d\n", discovered(&start, visited, visits));
 
-	while(qq!=0) {
+	while(add!=remove) {
 
-		Parcel v = queue[qq-1];
+		Parcel v = queue[remove++];
 		printf("v: %s\n", v.identification.freguesia);
 
 		if (sameIdentification(v.identification, goal.identification, 3)) {
 			printf("Goal found at %d\n", path);
 			return ;
 		} else {
-			printf("Goal not found\n");
+//			printf("Goal not found\n");
 		}
 
 		Parcel *adj = malloc(n*sizeof(Parcel));
-		printf("Allocating adjacencies\n");
+//		printf("Allocating adjacencies\n");
 
 		int count = 0;
-		printf("Getting neighbors\n");
-		path++;
+//		printf("Getting neighbors\n");
 		generateAdjacencies(&v, cartography, n, adj, &count);
-		printf("Got neighbors\n");
+//		printf("Got neighbors\n");
 		for (int j = 0 ; j < count; j++) {
 			// TODO CARE ABOUT THIS ADDED LATE AT NIGHT
 			// TODO F 163 169 GETTING STUCK IN VERDOEJO
@@ -756,13 +763,14 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 				return ;
 			}
 			if (!discovered(adj+j, visited, visits)) {
-				printf("Not discovered\n");
+//				printf("Not discovered\n");
 				visited[visits++] = *(adj+j);
-				printf("Added %s to visited\n", (*(adj+j)).identification.freguesia);
-				queue[qq++] = *(adj+j);
+//				printf("Added %s to visited\n", (*(adj+j)).identification.freguesia);
+				queue[add++] = *(adj+j);
 				printf("Added %s to queue\n", (*(adj+j)).identification.freguesia);
 			}
 		}
+		path++;
 		free(adj);
 	}
 
@@ -772,7 +780,6 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 		printf("\n");
 	}
 	*/
-//	free(path);
 }
 
 

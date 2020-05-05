@@ -100,7 +100,7 @@ typedef struct {	// Parcela duma freguesia. É um anel com eventuais buracos
 #endif
 
 bool insideParcel(Coordinates c, Parcel p);
-bool adjacentParcels(Parcel *a, Parcel *b);
+bool adjacentParcels(Parcel a, Parcel b);
 
 
 
