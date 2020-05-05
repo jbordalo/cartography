@@ -308,14 +308,14 @@ static bool nestedParcels(Parcel *a, Parcel *b) {
 	return parcelInsideParcel(a, b) || parcelInsideParcel(b, a);
 }
 
-bool adjacentParcels(Parcel a, Parcel b)
+bool adjacentParcels(Parcel *a, Parcel *b)
 {
 	////// FAZER
-	if (adjacentRings(a.edge, b.edge)) {
+	if (adjacentRings(a->edge, b->edge)) {
 		return true;
 	}
 
-	return nestedParcels(&a, &b);
+	return nestedParcels(a, b);
 
 }
 
@@ -659,7 +659,7 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	for (i = 0; i < n; i++) {
 		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
 		if (!sameIdentification(p.identification, cartography[i].identification, 3)
-				&& adjacentParcels(p, cartography[i])) {
+				&& adjacentParcels(&p, &cartography[i])) {
 			emptyFlag = 0;
 			showIdentification(i, cartography[i].identification, 3);
 			printf("\n");
@@ -678,7 +678,7 @@ static void generateAdjacencies(Parcel *parcel, Cartography cartography, int n, 
 		int i;
 		for (i = 0; i < n; i++) {
 			if (!sameIdentification(initial.identification, cartography[i].identification, 3)
-					&& adjacentParcels(initial, cartography[i]))
+					&& adjacentParcels(&initial, &cartography[i]))
 			// TODO f152 153 CRASHED IN THIS adjacentParcels FIRST ITERATION
 			{
 
@@ -694,7 +694,7 @@ static bool discovered(Parcel *a, Parcel *v, int size) {
 	for (int i = 0; i < size ; i++) {
 		Parcel current = *(v+i);
 		if (sameIdentification((*a).identification, current.identification, 3)) {
-			printf("Has been discovered\n");
+//			printf("Has been discovered\n");
 			return true;
 		}
 	}
@@ -707,7 +707,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 			return ;
 
 	// BFS
-
+	int path = 0;
 	// Define start and goal
 	Parcel start = cartography[pos1];
 	Parcel goal = cartography[pos2];
@@ -719,7 +719,6 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 	Parcel *queue = malloc(n*sizeof(Parcel));
 	int qq = 0;
 
-	queue[qq++] = start;
 	visited[visits++] = start;
 
 	printf("%d\n", discovered(&start, visited, visits));
@@ -730,7 +729,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 		printf("v: %s\n", v.identification.freguesia);
 
 		if (sameIdentification(v.identification, goal.identification, 3)) {
-			printf("Goal found\n");
+			printf("Goal found at %d\n", path);
 			return ;
 		} else {
 			printf("Goal not found\n");
@@ -741,13 +740,22 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 
 		int count = 0;
 		printf("Getting neighbors\n");
+		path++;
 		generateAdjacencies(&v, cartography, n, adj, &count);
 		printf("Got neighbors\n");
 		for (int j = 0 ; j < count; j++) {
+			// TODO CARE ABOUT THIS ADDED LATE AT NIGHT
+			// TODO F 163 169 GETTING STUCK IN VERDOEJO
+			if (sameIdentification((adj+j)->identification, goal.identification, 3)) {
+				printf("Goal found at %d\n", path);
+				return ;
+			}
 			if (!discovered(adj+j, visited, visits)) {
 				printf("Not discovered\n");
 				visited[visits++] = *(adj+j);
+				printf("Added %s to visited\n", (*(adj+j)).identification.freguesia);
 				queue[qq++] = *(adj+j);
+				printf("Added %s to queue\n", (*(adj+j)).identification.freguesia);
 			}
 		}
 		free(adj);
