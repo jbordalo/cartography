@@ -775,13 +775,15 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 static void part(double dist, Cartography cartography, int * pos, int n){
 	int far [n];
 	int close[n];
-	int f = 0, c = 0;
-
-	for(int i = 0; i < n-1; i++){
-		close[c] = pos[i];
+	int f,c;
+	//for(int i = 0; i < n-1; i++){ ??? seems to work without this loop
+									//but does it make sense without it?
+		f=0;
+		c=0;
+		close[c] = pos[0];
 		c++;
-		for(int j = i+1; j < n; j++){
-			if(haversine(cartography[pos[i]].edge.vertexes[0],
+		for(int j = 1; j < n; j++){
+			if(haversine(cartography[pos[0]].edge.vertexes[0],
 					cartography[pos[j]].edge.vertexes[0]) >= dist)
 			{
 				far[f] = pos[j];
@@ -791,20 +793,21 @@ static void part(double dist, Cartography cartography, int * pos, int n){
 				c++;
 			}
 		}
-		if( f == 0 ){
-			c = 0;
-			f = 0;
-			continue;
-		} else {
-			part(dist, cartography, close, c);
-			part(dist, cartography, far, f);
-			break;
+		//break;
+	//}
+	if( f != 0 ){
+		part(dist, cartography, far, f);
+	}
+	//testing - order needs to be fixed + may want to improve the code
+	for( int i = 0; i < c; i++){
+		bool minimize = false;
+		printf("%d", close[i]);
+		while(i< c-1 && close[i+1] == close[i]+1){
+			i++;
+			minimize = true;
 		}
+		if (minimize) printf("-%d ", close[i]);
 	}
-	for(int i = 0; i< c; i++){
-		printf(" %d ", close[i]);
-	}
-	printf("\n");
 }
 
 static void commandPartition(double dist, Cartography cartography, int n)
