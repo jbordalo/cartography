@@ -762,8 +762,49 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 //	free(path);
 }
 
+
+static void part(double dist, Cartography cartography, int * pos, int n){
+	int far [n];
+	int close[n];
+	int f = 0, c = 0;
+
+	for(int i = 0; i < n-1; i++){
+		close[c] = pos[i];
+		c++;
+		for(int j = i+1; j < n; j++){
+			if(haversine(cartography[pos[i]].edge.vertexes[0],
+					cartography[pos[j]].edge.vertexes[0]) >= dist)
+			{
+				far[f] = pos[j];
+				f++;
+			} else {
+				close[c] = pos[j];
+				c++;
+			}
+		}
+		if( f == 0 ){
+			c = 0;
+			f = 0;
+			continue;
+		} else {
+			part(dist, cartography, close, c);
+			part(dist, cartography, far, f);
+			break;
+		}
+	}
+	for(int i = 0; i< c; i++){
+		printf(" %d ", close[i]);
+	}
+	printf("\n");
+}
+
 static void commandPartition(double dist, Cartography cartography, int n)
 {
+	int v[n];
+	for(int i = 0; i<n; i++){
+		v[i]=i;
+	}
+	part(dist, cartography, v, n);
 }
 
 void interpreter(Cartography cartography, int n)
