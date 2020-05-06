@@ -4,7 +4,7 @@
  *
  * COMPILAÇÃO: gcc -std=c11 -o Main Cartography.c Main.c -lm
  */
-
+#define USE_PTS		true
 #include "Cartography.h"
 
 static Cartography cartography;	// variável gigante

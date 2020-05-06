@@ -27,7 +27,7 @@ COMENTÁRIO
  se pede no enunciado.
 
 */
-
+#define USE_PTS		true
 #include "Cartography.h"
 
 //#define max(a, b) ((a) > (b) ? (a) : (b))
@@ -194,18 +194,19 @@ bool insideRectangle(Coordinates c, Rectangle r)
 
 static Ring readRing(FILE *f)
 {
-	Ring r;
 	int i, n = readInt(f);
-	if (n > MAX_VERTEXES)
-		error("Anel demasiado extenso");
-	r.nVertexes = n;
+	Ring *r = malloc(sizeof(Ring));
+	r->vertexes = malloc(sizeof(Coordinates)*n);
+//	if (n > MAX_VERTEXES)
+//		error("Anel demasiado extenso");
+	r->nVertexes = n;
 	for (i = 0; i < n; i++)
 	{
-		r.vertexes[i] = readCoordinates(f);
+		r->vertexes[i] = readCoordinates(f);
 	}
-	r.boundingBox =
-		calculateBoundingBox(r.vertexes, r.nVertexes);
-	return r;
+	r->boundingBox =
+		calculateBoundingBox(r->vertexes, r->nVertexes);
+	return *r;
 }
 
 // http://alienryderflex.com/polygon/
@@ -232,7 +233,6 @@ bool adjacentRings(Ring a, Ring b)
 {
 	////// FAZER
 	// Two Rings are adjacent if they share any vertexes
-
 	int i;
 	int j;
 	for (i = 0; i < a.nVertexes; i++)
@@ -252,18 +252,20 @@ bool adjacentRings(Ring a, Ring b)
 
 static Parcel readParcel(FILE *f)
 {
-	Parcel p;
-	p.identification = readIdentification(f);
+	Parcel *p = malloc(sizeof(Parcel));
+	p->identification = readIdentification(f);
 	int i, n = readInt(f);
-	if (n > MAX_HOLES)
-		error("Poligono com demasiados buracos");
-	p.edge = readRing(f);
-	p.nHoles = n;
+//	if (n > MAX_HOLES)
+//		error("Poligono com demasiados buracos");
+
+	p->edge = readRing(f);
+	p->nHoles = n;
+	p->holes = malloc(sizeof(Ring)*n); // TODO RING POINTER?
 	for (i = 0; i < n; i++)
 	{
-		p.holes[i] = readRing(f);
+		p->holes[i] = readRing(f);
 	}
-	return p;
+	return *p;
 }
 
 static void showHeader(Identification id)
@@ -332,9 +334,14 @@ int loadCartography(String fileName, Cartography *cartography)
 	f = fopen(fileName, "r");
 	if( f == NULL )
 		error("Impossivel abrir ficheiro");
-	int n = readInt(f);
-	if( n > MAX_PARCELS )
-		error("Demasiadas parcelas no ficheiro");
+	int n = readInt(f); // Number of parcels
+	// Cartography is a collection of parcels
+//	cartography = malloc(sizeof(Cartography));
+
+	*cartography = malloc(sizeof(Parcel)*n);
+
+//	if( n > MAX_PARCELS )
+//		error("Demasiadas parcelas no ficheiro");
 	for( i = 0 ; i < n ; i++ ) {
 		(*cartography)[i] = readParcel(f);
 	}
