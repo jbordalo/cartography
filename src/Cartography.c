@@ -483,16 +483,6 @@ static void commandExtremes(Cartography cartography, int n)
 	showParcel(west, cartography[west], -'W');
 }
 
-/*
-static double calculateRingLength(Ring ring) {
-	double length;
-	int i;
-	for (i = 0; i < ring.nVertexes; i++) {
-		length += haversine(ring.vertexes[i], ring.vertexes[ (i + 1) % ring.nVertexes ]);
-	}
-	return length;
-}
-*/
 
 static void printHoles(Ring *holes, int n)
 {
@@ -548,8 +538,6 @@ static void commandHowMany(int pos, Cartography cartography, int n)
 	showHowMany(pos, cartography, n, 2);
 	showHowMany(pos, cartography, n, 1);
 }
-
-// TODO type-safety
 
 //static int compareCounties(const void *av, const void *bv)
 //{
@@ -668,7 +656,6 @@ static void commandAdjacent(int pos, Cartography cartography, int n)
 	int emptyFlag = 1;
 	int i;
 	for (i = 0; i < n; i++) {
-		// TODO PROBABLY DON'T GO OVER EVERY PARCEL <--------------
 		if (!sameIdentification(p.identification, cartography[i].identification, 3)
 				&& adjacentParcels(p, cartography[i])) {
 			emptyFlag = 0;
@@ -839,9 +826,9 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 		printf("NAO HA CAMINHO\n");
 	}
 	// TODO DO I NEED THIS ELSE??? IF I FOUND IT I STOPPED
-	else {
-		printf("Goal: %d\n", distances[pos2]);
-	}
+//	else {
+//		printf("Goal: %d\n", distances[pos2]);
+//	}
 
 }
 
