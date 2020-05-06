@@ -551,31 +551,36 @@ static void commandHowMany(int pos, Cartography cartography, int n)
 
 // TODO type-safety
 
-static int compareCounties(const void *av, const void *bv)
-{
-	const Parcel *a = av, *b = bv;
-	return strcmp(a->identification.concelho, b->identification.concelho);
-}
+//static int compareCounties(const void *av, const void *bv)
+//{
+//	const Parcel *a = av, *b = bv;
+//	return strcmp(a->identification.concelho, b->identification.concelho);
+//}
 
+static int compareStrings(const void *av, const void *bv) {
+	return strcmp(av, bv);
+}
 
 static void commandCounties(Cartography cartography, int n) {
 	// Allocate size for the copy
-	Parcel *counties = malloc(sizeof(Parcel) * n);
-	// Copy the vector
-	memcpy(counties, cartography, sizeof(Parcel) * n);
+	String *counties = malloc(sizeof(String) * n);
 
-	// Sort the vector
-	qsort(counties, n, sizeof(Parcel), compareCounties);
-
+	int count = 0;
 	int last;
 	for (int i = 0; i < n; i = last + 1)
 	{
-		last = findLast(counties, n, i, counties[i].identification, 2);
-		printf("%s\n", counties[i].identification.concelho);
+		last = findLast(cartography, n, i, cartography[i].identification, 2);
+		strcpy((char *) (counties+count++), cartography[i].identification.concelho);
+	}
+
+	// Sort the vector
+	qsort(counties, count, sizeof(String), compareStrings);
+
+	for ( int i = 0 ; i < count ; i ++ ) {
+		printf("%s\n", counties[i]);
 	}
 
 	free(counties);
-
 }
 
 /* VERY WELL WRITTEN AND I READ IT WITH GREAT ATTENTION, <3 YOU
