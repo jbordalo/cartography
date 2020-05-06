@@ -636,15 +636,9 @@ int inParcel(double lat, double lon, Cartography cartography, int n)
 	Coordinates c = coord(lat, lon);
 	for (int i = 0; i < n; i++)
 	{
-		Ring r = cartography[i].edge;
-		// TODO calculatBoundingBox is done in the beginning? can just use?
-		// TODO FIRST THING INSIDEPARCEL DOES IS CALL INSIDERING WHICH DOES THE BOUNDINGBOX CHECK
-		if (insideRectangle(c, calculateBoundingBox(r.vertexes, r.nVertexes)))
+		if (insideParcel(c, cartography[i]))
 		{
-			if (insideParcel(c, cartography[i]))
-			{
-				return i;
-			}
+			return i;
 		}
 	}
 	return -1;
