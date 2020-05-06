@@ -567,6 +567,7 @@ static void commandCounties(Cartography cartography, int n) {
 
 	int count = 0;
 	int last;
+	// Copy each county without repeats onto the vector
 	for (int i = 0; i < n; i = last + 1)
 	{
 		last = findLast(cartography, n, i, cartography[i].identification, 2);
@@ -576,8 +577,8 @@ static void commandCounties(Cartography cartography, int n) {
 	// Sort the vector
 	qsort(counties, count, sizeof(String), compareStrings);
 
-	for ( int i = 0 ; i < count ; i ++ ) {
-		printf("%s\n", counties[i]);
+	for ( int j = 0 ; j < count ; j ++ ) {
+		printf("%s\n", counties[j]);
 	}
 
 	free(counties);
@@ -600,27 +601,31 @@ static void c (Cartography cartography, int n){
 }
 */
 
-static int compareDistricts(const void *av, const void *bv)
-{
-	const Parcel *a = av, *b = bv;
-	return strcmp(a->identification.distrito, b->identification.distrito);
-}
+//static int compareDistricts(const void *av, const void *bv)
+//{
+//	const Parcel *a = av, *b = bv;
+//	return strcmp(a->identification.distrito, b->identification.distrito);
+//}
 
 static void commandDistricts(Cartography cartography, int n)
 {
 	// Allocate size for the copy
-	Parcel *districts = malloc(sizeof(Parcel) * n);
-	// Copy the vector
-	memcpy(districts, cartography, sizeof(Parcel) * n);
+	String *districts = malloc(sizeof(String) * n);
 
-	// Sort the vector
-	qsort(districts, n, sizeof(Parcel), compareDistricts);
-
+	int count = 0;
 	int last;
+	// Copy each district without repeats onto the vector
 	for (int i = 0; i < n; i = last + 1)
 	{
-		last = findLast(districts, n, i, districts[i].identification, 1);
-		printf("%s\n", districts[i].identification.distrito);
+		last = findLast(cartography, n, i, cartography[i].identification, 1);
+		strcpy((char *) (districts+count++), cartography[i].identification.distrito);
+	}
+
+	// Sort the vector
+	qsort(districts, count, sizeof(String), compareStrings);
+
+	for (int j = 0 ; j < count ; j++) {
+		printf("%s\n", districts[j]);
 	}
 
 	free(districts);
@@ -631,8 +636,9 @@ int inParcel(double lat, double lon, Cartography cartography, int n)
 	Coordinates c = coord(lat, lon);
 	for (int i = 0; i < n; i++)
 	{
-		// TODO calculatBoundingBox
 		Ring r = cartography[i].edge;
+		// TODO calculatBoundingBox is done in the beginning? can just use?
+		// TODO FIRST THING INSIDEPARCEL DOES IS CALL INSIDERING WHICH DOES THE BOUNDINGBOX CHECK
 		if (insideRectangle(c, calculateBoundingBox(r.vertexes, r.nVertexes)))
 		{
 			if (insideParcel(c, cartography[i]))
@@ -816,23 +822,30 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 					&& adjacentParcels(cartography[v], cartography[i]))
 			{
 
-				// Found it
+				// Found it, end straight away
 				if (sameIdentification(cartography[i].identification, cartography[pos2].identification, 3)) {
 					printf("%d\n", distances[v] + 1);
 					return ;
 				}
 
+				// If it wasn't visited
 				if (distances[i] == -1) {
+					// Update its distance to start
 					distances[i] = 1 + distances[v];
+					// Add it to the queue
 					queue[add++] = i;
 				}
 			}
 		}
 	}
 
+	// If distances[pos2] was not updated to a number different than -1
+	// Then we haven't found it. The graph is not connected.
 	if (distances[pos2] == -1) {
 		printf("NAO HA CAMINHO\n");
-	} else {
+	}
+	// TODO DO I NEED THIS ELSE??? IF I FOUND IT I STOPPED
+	else {
 		printf("Goal: %d\n", distances[pos2]);
 	}
 
@@ -843,7 +856,7 @@ static void part(double dist, Cartography cartography, int * pos, int n){
 	int close[n];
 	int f,c;
 	//for(int i = 0; i < n-1; i++){ ??? seems to work without this loop
-									//but does it make sense without it?
+									//but does it make sense without it? EVERYTHING YOU DO MAKES SENSE SWEETIE
 		f=0;
 		c=0;
 		close[c] = pos[0];
