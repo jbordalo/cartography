@@ -831,7 +831,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 //	}
 
 }
-
+/*
 static void part(double dist, Cartography cartography, int * pos, int n){
 	int far [n];
 	int close[n];
@@ -869,14 +869,73 @@ static void part(double dist, Cartography cartography, int * pos, int n){
 		if (minimize) printf("-%d ", close[i]);
 	}
 }
+*/
+
+static void printIndex(int n, int *indexes)
+{
+	for( int i = 0; i < n; i++){
+		bool minimize = false;
+		printf("%d", indexes[i]);
+		while(i< n-1 && indexes[i+1] == indexes[i]+1){
+			i++;
+			minimize = true;
+		}
+		if (minimize) printf("-%d ", indexes[i]);
+	}
+	printf("\n");
+}
+
+static int split(Parcel * cartography, int * start, int ns, int * outRange, double dist)
+{
+	int * inRange = malloc(ns*sizeof(int));
+	int in, out;
+	printf("inside split\n");
+	for(int i = 0; i < ns; i++)
+	{
+		in = 0;
+		out = 0;
+		//printf("in: %d out: %d ns: %d \n", in, out,  ns);
+		for(int j = 0; j < ns; j++){
+			if(haversine(cartography[start[i]].edge.vertexes[0],
+					cartography[start[j]].edge.vertexes[0]) >= dist){
+				outRange[out++] = start[j];
+			} else {
+				inRange[in++] = start[j];
+			}
+		}
+		//printf("in: %d out: %d \n", in, out);
+		if(out != 0){
+			printIndex(in, inRange);
+			free(inRange);
+			return out;
+		}
+	}
+	printIndex(in, inRange);
+	free(inRange);
+	return 0;
+}
 
 static void commandPartition(double dist, Cartography cartography, int n)
 {
-	int v[n];
-	for(int i = 0; i<n; i++){
-		v[i]=i;
+	int * inRange = malloc(n*sizeof(int));
+	int * outRange = malloc(n*sizeof(int));
+	int in = 0, out = 0;
+	for(int i = 0; i < n; i++){
+			if(haversine(cartography[0].edge.vertexes[0], cartography[i].edge.vertexes[0]) <= dist){
+				inRange[in++] = i;
+			} else {
+				outRange[out++] = i;
+		}
 	}
-	part(dist, cartography, v, n);
+	printIndex(in, inRange);
+	free(inRange);
+	int flag;
+	do {
+		printf("inside while : out %d \n", out);
+		flag = split(cartography, outRange, out, outRange, dist);
+		out = flag;
+
+	} while(flag);
 }
 
 void interpreter(Cartography cartography, int n)
