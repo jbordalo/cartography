@@ -881,6 +881,7 @@ static void printIndex(int n, int *indexes)
 			minimize = true;
 		}
 		if (minimize) printf("-%d ", indexes[i]);
+		else printf(" ");
 	}
 	printf("\n");
 }
@@ -889,21 +890,20 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 {
 	int * inRange = malloc(ns*sizeof(int));
 	int in, out;
-	printf("inside split\n");
 	for(int i = 0; i < ns; i++)
 	{
 		in = 0;
 		out = 0;
-		//printf("in: %d out: %d ns: %d \n", in, out,  ns);
+		int posi= start[i];
 		for(int j = 0; j < ns; j++){
-			if(haversine(cartography[start[i]].edge.vertexes[0],
-					cartography[start[j]].edge.vertexes[0]) >= dist){
-				outRange[out++] = start[j];
+			int posj= start[j];
+			if(haversine(cartography[posi].edge.vertexes[0],
+					cartography[posj].edge.vertexes[0]) >= dist){
+				outRange[out++] = posj;
 			} else {
-				inRange[in++] = start[j];
+				inRange[in++] = posj;
 			}
 		}
-		//printf("in: %d out: %d \n", in, out);
 		if(out != 0){
 			printIndex(in, inRange);
 			free(inRange);
@@ -929,13 +929,13 @@ static void commandPartition(double dist, Cartography cartography, int n)
 	}
 	printIndex(in, inRange);
 	free(inRange);
-	int flag;
-	do {
-		printf("inside while : out %d \n", out);
-		flag = split(cartography, outRange, out, outRange, dist);
-		out = flag;
-
-	} while(flag);
+	if(out != 0){
+		int flag;
+		do {
+			flag = split(cartography, outRange, out, outRange, dist);
+			out = flag;
+		} while(flag);
+	}
 }
 
 void interpreter(Cartography cartography, int n)
