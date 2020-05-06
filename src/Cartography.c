@@ -898,10 +898,10 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 		for(int j = 0; j < ns; j++){
 			int posj= start[j];
 			if(haversine(cartography[posi].edge.vertexes[0],
-					cartography[posj].edge.vertexes[0]) >= dist){
-				outRange[out++] = posj;
-			} else {
+					cartography[posj].edge.vertexes[0]) <= dist){
 				inRange[in++] = posj;
+			} else {
+				outRange[out++] = posj;
 			}
 		}
 		if(out != 0){
@@ -936,6 +936,7 @@ static void commandPartition(double dist, Cartography cartography, int n)
 			out = flag;
 		} while(flag);
 	}
+	free(outRange);
 }
 
 void interpreter(Cartography cartography, int n)
