@@ -483,7 +483,7 @@ static void commandExtremes(Cartography cartography, int n)
 {
 	int north, south, west, east = 0;
 	double xmax = -180, ymax = -90, xmin = 180, ymin = 90;
-	for (int i = 1; i < n; i++)
+	for (int i = 0; i < n; i++)
 	{
 		Ring edge = cartography[i].edge;
 		Rectangle r = calculateBoundingBox(edge.vertexes, edge.nVertexes);
@@ -748,6 +748,12 @@ static bool pull(int * range, int r, int pos,double dist, Parcel * cartography){
 	}
 	return false;
 }
+
+static int compareInt(const void *av, const void *bv)
+{
+	return *((int *)av)-*((int*)bv);
+}
+
 static int split(Parcel * cartography, int * start, int ns, int * outRange, double dist)
 {
 	int * inRange = malloc(ns*sizeof(int));
@@ -777,12 +783,14 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 			}
 		}
 		if(count != 0){
+			qsort(inRange, in, sizeof(int), compareInt);
 			printIndex(in, inRange);
 			free(inRange);
 			free(outR);
 			return out;
 		}
 	}
+	qsort(inRange, in, sizeof(int), compareInt);
 	printIndex(in, inRange);
 	free(inRange);
 	free(outR);
@@ -811,7 +819,7 @@ static void commandPartition(double dist, Cartography cartography, int n)
 			outRange[count++] = outR[k];
 		}
 	}
-
+	qsort(inRange, in, sizeof(int), compareInt);
 	printIndex(in, inRange);
 	free(inRange);
 	free(outR);
