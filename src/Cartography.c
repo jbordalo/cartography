@@ -893,9 +893,21 @@ static void printIndex(int n, int *indexes)
 	printf("\n");
 }
 
+static bool pull(int * range, int r, int pos,double dist, Parcel * cartography){
+	for(int i = 0 ; i<r; i++){
+		int posi = range[i];
+		if(haversine(cartography[posi].edge.vertexes[0],
+					cartography[pos].edge.vertexes[0]) <= dist)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 static int split(Parcel * cartography, int * start, int ns, int * outRange, double dist)
 {
 	int * inRange = malloc(ns*sizeof(int));
+	int * outR = malloc(ns* sizeof(int));
 	int in, out;
 	for(int i = 0; i < ns; i++)
 	{
@@ -908,17 +920,28 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 					cartography[posj].edge.vertexes[0]) <= dist){
 				inRange[in++] = posj;
 			} else {
-				outRange[out++] = posj;
+					outR[out++] = posj;
+			}
+
+		}
+		int count = 0;
+		for(int k = 0; k < out; k++){
+			if(pull(inRange, in, outR[k], dist, cartography)){
+				inRange[in++] = outR[k];
+			} else {
+				outRange[count++] = outR[k];
 			}
 		}
-		if(out != 0){
+		if(count != 0){
 			printIndex(in, inRange);
 			free(inRange);
+			free(outR);
 			return out;
 		}
 	}
 	printIndex(in, inRange);
 	free(inRange);
+	free(outR);
 	return 0;
 }
 
@@ -926,16 +949,27 @@ static void commandPartition(double dist, Cartography cartography, int n)
 {
 	int * inRange = malloc(n*sizeof(int));
 	int * outRange = malloc(n*sizeof(int));
+	int * outR = malloc(n*sizeof(int));
 	int in = 0, out = 0;
 	for(int i = 0; i < n; i++){
 			if(haversine(cartography[0].edge.vertexes[0], cartography[i].edge.vertexes[0]) <= dist){
 				inRange[in++] = i;
 			} else {
-				outRange[out++] = i;
+				outR[out++] = i;
+			}
+	}
+	int count = 0;
+	for(int k = 0; k < out; k++){
+		if(pull(inRange, in, outR[k], dist, cartography)){
+			inRange[in++] = outR[k];
+		} else {
+			outRange[count++] = outR[k];
 		}
 	}
+
 	printIndex(in, inRange);
 	free(inRange);
+	free(outR);
 	if(out != 0){
 		int flag;
 		do {
