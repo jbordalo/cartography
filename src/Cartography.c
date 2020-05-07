@@ -104,9 +104,12 @@ static void showValue(int value)
 static bool sameIdentification(Identification id1, Identification id2, int z)
 {
 	if (z == 3)
-		return strcmp(id1.freguesia, id2.freguesia) == 0 && strcmp(id1.concelho, id2.concelho) == 0 && strcmp(id1.distrito, id2.distrito) == 0;
+		return strcmp(id1.freguesia, id2.freguesia) == 0
+				&& strcmp(id1.concelho, id2.concelho) == 0
+				&& strcmp(id1.distrito, id2.distrito) == 0;
 	else if (z == 2)
-		return strcmp(id1.concelho, id2.concelho) == 0 && strcmp(id1.distrito, id2.distrito) == 0;
+		return strcmp(id1.concelho, id2.concelho) == 0
+				&& strcmp(id1.distrito, id2.distrito) == 0;
 	else
 		return strcmp(id1.distrito, id2.distrito) == 0;
 }
@@ -421,9 +424,11 @@ static int calculateLength(Cartography cartography, int pos, int n, int mode)
 {
 	Identification id = cartography[pos].identification;
 	int count = 1;
-	for (int i = pos + 1; i < n && sameIdentification(id, cartography[i].identification, mode); i++)
+	for (int i = pos + 1; i < n
+			&& sameIdentification(id, cartography[i].identification, mode); i++)
 		count++;
-	for (int i = pos - 1; i >= 0 && sameIdentification(id, cartography[i].identification, mode); i--)
+	for (int i = pos - 1; i >= 0
+			&& sameIdentification(id, cartography[i].identification, mode); i--)
 		count++;
 	return count;
 }
@@ -737,7 +742,7 @@ static void printIndex(int n, int *indexes)
 	printf("\n");
 }
 
-static bool pull(int * range, int r, int pos,double dist, Parcel * cartography){
+static bool pull(int * range, int r, int pos,double dist, Parcel * cartography) {
 	for(int i = 0 ; i<r; i++){
 		int posi = range[i];
 		if(haversine(cartography[posi].edge.vertexes[0],
@@ -805,7 +810,8 @@ static void commandPartition(double dist, Cartography cartography, int n)
 	int * outR = malloc(n*sizeof(int));
 	int in = 0, out = 0;
 	for(int i = 0; i < n; i++){
-			if(haversine(cartography[0].edge.vertexes[0], cartography[i].edge.vertexes[0]) <= dist){
+			if(haversine(cartography[0].edge.vertexes[0],
+						cartography[i].edge.vertexes[0]) <= dist) {
 				inRange[in++] = i;
 			} else {
 				outR[out++] = i;
