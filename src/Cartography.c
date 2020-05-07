@@ -729,7 +729,8 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 
 static void printIndex(int n, int *indexes)
 {
-	for( int i = 0; i < n; i++){
+	printf(" ");
+	for(int i = 0; i < n; i++){
 		bool minimize = false;
 		printf("%d", indexes[i]);
 		while(i< n-1 && indexes[i+1] == indexes[i]+1){
