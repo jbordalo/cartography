@@ -35,14 +35,14 @@ COMENTÁRIO
 
 /* STRING -------------------------------------- */
 
-static void showStringVector(StringVector sv, int n)
-{
-	int i;
-	for (i = 0; i < n; i++)
-	{
-		printf("%s\n", sv[i]);
-	}
-}
+//static void showStringVector(StringVector sv, int n)
+//{
+//	int i;
+//	for (i = 0; i < n; i++)
+//	{
+//		printf("%s\n", sv[i]);
+//	}
+//}
 
 /* UTIL */
 
@@ -155,8 +155,8 @@ double haversine(Coordinates c1, Coordinates c2)
 
 Rectangle rect(Coordinates tl, Coordinates br)
 {
-	Rectangle rect = {tl, br};
-	return rect;
+	Rectangle r = {tl, br};
+	return r;
 }
 
 static void showRectangle(Rectangle r)
@@ -347,7 +347,7 @@ int loadCartography(String fileName, Cartography *cartography)
 	// Cartography is a collection of parcels
 
 	// Allocate size for the n parcels
-	*cartography = malloc(sizeof(Parcel)*n);
+	*cartography = malloc(sizeof(Parcel) * n);
 
 	for( i = 0 ; i < n ; i++ ) {
 		(*cartography)[i] = readParcel(f);
@@ -408,7 +408,7 @@ static void commandListCartography(Cartography cartography, int n)
 	showCartography(cartography, n);
 }
 
-int nVertexes(Parcel p)
+static int mVertexes(Parcel p)
 {
 	int n = 0;
 	n += p.edge.nVertexes;
@@ -440,14 +440,14 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 					   sameIdentification(id, cartography[maxPos].identification, 3);
 		 maxPos--)
 		;
-	max = nVertexes(cartography[maxPos]);
+	max = mVertexes(cartography[maxPos]);
 
 	for (int i = maxPos; i < n; i++)
 	{
 		Parcel p = cartography[i];
 		if (sameIdentification(id, p.identification, 3))
 		{
-			int v = nVertexes(p);
+			int v = mVertexes(p);
 			if (v > max)
 			{
 				max = v;
