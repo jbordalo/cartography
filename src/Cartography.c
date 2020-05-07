@@ -737,8 +737,8 @@ static void printIndex(int n, int *indexes)
 			i++;
 			minimize = true;
 		}
-		if (minimize) printf("-%d ", indexes[i]);
-		else if(i != n-1) printf(" ");
+		if (minimize) printf("-%d", indexes[i]);
+		if(i != n-1) printf(" ");
 	}
 	printf("\n");
 }
