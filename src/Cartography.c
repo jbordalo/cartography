@@ -823,11 +823,11 @@ static void commandPartition(double dist, Cartography cartography, int n)
 	printIndex(in, inRange);
 	free(inRange);
 	free(outR);
-	if(out != 0){
+	if(count != 0){
 		int flag;
 		do {
-			flag = split(cartography, outRange, out, outRange, dist);
-			out = flag;
+			flag = split(cartography, outRange, count, outRange, dist);
+			count = flag;
 		} while(flag);
 	}
 	free(outRange);
