@@ -672,7 +672,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 			return ;
 
 	if (pos1 == pos2) {
-		printf("0\n");
+		printf(" 0\n");
 		return ;
 	}
 
@@ -703,7 +703,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 
 				// If we find it, end straight away
 				if (i == pos2) {
-					printf("%d\n", distances[v] + 1);
+					printf(" %d\n", distances[v] + 1);
 					return ;
 				}
 
