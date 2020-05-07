@@ -737,7 +737,7 @@ static void printIndex(int n, int *indexes)
 			minimize = true;
 		}
 		if (minimize) printf("-%d ", indexes[i]);
-		else printf(" ");
+		else if(i != n-1) printf(" ");
 	}
 	printf("\n");
 }
@@ -752,6 +752,32 @@ static bool pull(int * range, int r, int pos,double dist, Parcel * cartography) 
 		}
 	}
 	return false;
+}
+static bool belongsto(int * range, int r, int pos){
+	for(int i = 0; i< r; i++){
+		if(range[i] == pos)
+			return true;
+	}
+	return false;
+}
+
+static int checkPull(int * inRange, int * outRange, int *out,
+		int* outR, double dist, Parcel* cartography, int * in){
+	int count = 0;
+	int added = 0;
+	for(int k = 0; k < *out; k++){
+		if(!belongsto(inRange, *in, outR[k])){
+			if(pull(inRange, *in, outR[k], dist, cartography)){
+				inRange[(*in)++] = outR[k];
+				added++;
+			} else {
+				outRange[count++] = outR[k];
+
+			}
+		}
+	}
+	*out = count;
+	return added;
 }
 
 static int compareInt(const void *av, const void *bv)
@@ -771,23 +797,22 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 		int posi= start[i];
 		for(int j = 0; j < ns; j++){
 			int posj= start[j];
-			if(haversine(cartography[posi].edge.vertexes[0],
-					cartography[posj].edge.vertexes[0]) <= dist){
+			double d = haversine(cartography[posi].edge.vertexes[0],
+					cartography[posj].edge.vertexes[0]);
+			//printf("dist %f, posi: % d posj: %d\n i: %d j: %d \n", d, posi, posj, i, j);
+			if(d <= dist){
 				inRange[in++] = posj;
 			} else {
-					outR[out++] = posj;
+				outR[out++] = posj;
 			}
 
 		}
-		int count = 0;
-		for(int k = 0; k < out; k++){
-			if(pull(inRange, in, outR[k], dist, cartography)){
-				inRange[in++] = outR[k];
-			} else {
-				outRange[count++] = outR[k];
-			}
-		}
-		if(count != 0){
+		int added;
+		do {
+			added = checkPull(inRange, outRange, &out, outR, dist, cartography, &in);
+		} while(added != 0);
+
+		if(out != 0){
 			qsort(inRange, in, sizeof(int), compareInt);
 			printIndex(in, inRange);
 			free(inRange);
@@ -805,37 +830,16 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 // T dist
 static void commandPartition(double dist, Cartography cartography, int n)
 {
-	int * inRange = malloc(n*sizeof(int));
 	int * outRange = malloc(n*sizeof(int));
-	int * outR = malloc(n*sizeof(int));
-	int in = 0, out = 0;
-	for(int i = 0; i < n; i++){
-			if(haversine(cartography[0].edge.vertexes[0],
-						cartography[i].edge.vertexes[0]) <= dist) {
-				inRange[in++] = i;
-			} else {
-				outR[out++] = i;
-			}
+	for(int i = 0; i<n; i++){
+		outRange[i]= i;
 	}
-	int count = 0;
-	for(int k = 0; k < out; k++){
-		if(pull(inRange, in, outR[k], dist, cartography)){
-			inRange[in++] = outR[k];
-		} else {
-			outRange[count++] = outR[k];
-		}
-	}
-	qsort(inRange, in, sizeof(int), compareInt);
-	printIndex(in, inRange);
-	free(inRange);
-	free(outR);
-	if(count != 0){
-		int flag;
-		do {
-			flag = split(cartography, outRange, count, outRange, dist);
-			count = flag;
-		} while(flag);
-	}
+	int count = n;
+	int flag;
+	do {
+		flag = split(cartography, outRange, count, outRange, dist);
+		count = flag;
+	} while(flag);
 	free(outRange);
 }
 
