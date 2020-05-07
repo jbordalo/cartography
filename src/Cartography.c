@@ -543,7 +543,7 @@ static void commandTrip(double lat, double lon, int pos, Cartography cartography
 	{
 		minDist = fmin(minDist, haversine(c, *p));
 	}
-	printf("%f\n", minDist);
+	printf(" %f\n", minDist);
 }
 
 static void showHowMany(int pos, Cartography cartography, int n, int mode)
