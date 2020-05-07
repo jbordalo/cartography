@@ -417,7 +417,7 @@ static int mVertexes(Parcel p)
 	return n;
 }
 
-int calculateLength(Cartography cartography, int pos, int n, int mode)
+static int calculateLength(Cartography cartography, int pos, int n, int mode)
 {
 	Identification id = cartography[pos].identification;
 	int count = 1;
@@ -460,7 +460,7 @@ static void commandMaximum(int pos, Cartography cartography, int n)
 	showParcel(maxPos, cartography[maxPos], max);
 }
 
-void maxPos(int *pos, int i, double *prevmax, double m)
+static void maxPos(int *pos, int i, double *prevmax, double m)
 {
 	if (*prevmax < m)
 	{
@@ -469,7 +469,7 @@ void maxPos(int *pos, int i, double *prevmax, double m)
 	}
 }
 
-void minPos(int *pos, int i, double *prevmin, double m)
+static void minPos(int *pos, int i, double *prevmin, double m)
 {
 	if (*prevmin > m)
 	{
@@ -541,7 +541,7 @@ static void commandTrip(double lat, double lon, int pos, Cartography cartography
 	printf("%f\n", minDist);
 }
 
-void showHowMany(int pos, Cartography cartography, int n, int mode)
+static void showHowMany(int pos, Cartography cartography, int n, int mode)
 {
 	showIdentification(pos, cartography[pos].identification, mode);
 	showValue(calculateLength(cartography, pos, n, mode));
@@ -610,7 +610,7 @@ static void commandDistricts(Cartography cartography, int n)
 	free(districts);
 }
 
-int inParcel(double lat, double lon, Cartography cartography, int n)
+static int inParcel(double lat, double lon, Cartography cartography, int n)
 {
 	Coordinates c = coord(lat, lon);
 	for (int i = 0; i < n; i++)
@@ -674,10 +674,14 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 	// BFS
 	int queue[n];
 	int add = 0, remove = 0;
+
+	// We add the starting node to the queue
 	queue[add++] = pos1;
 
 	int distances[n];
+	// All distances start at -1 since they haven't been discovered yet
 	memset(distances, -1, n*sizeof(int));
+	// The distances from the start to itself is 0
 	distances[pos1] = 0;
 
 	// Make the queue
