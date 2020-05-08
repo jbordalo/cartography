@@ -615,6 +615,9 @@ static void commandDistricts(Cartography cartography, int n)
 	free(districts);
 }
 
+/**
+ * Checks if the given coordinate is inside any Parcel of cartography.
+ */
 static int inParcel(double lat, double lon, Cartography cartography, int n)
 {
 	Coordinates c = coord(lat, lon);
@@ -631,7 +634,6 @@ static int inParcel(double lat, double lon, Cartography cartography, int n)
 // P lat lon
 static void commandParcel(double lat, double lon, Cartography cartography, int n)
 {
-	//TODO check lat & lon
 	int res = inParcel(lat, lon, cartography, n);
 	if (res == -1)
 	{
@@ -727,6 +729,9 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 
 }
 
+/**
+ * Prints the indexes given in the array indexes (size n).
+ */
 static void printIndex(int n, int *indexes)
 {
 	printf(" ");
@@ -743,7 +748,11 @@ static void printIndex(int n, int *indexes)
 	printf("\n");
 }
 
-static bool pull(int * range, int r, int pos,double dist, Parcel * cartography) {
+/**
+ * Checks if the given parcel in pos is within range of any of the parcels
+ * with indexes in inRange array.
+ */
+static bool pull(int * rºange, int r, int pos, double dist, Parcel * cartography) {
 	for(int i = 0 ; i<r; i++){
 		int posi = range[i];
 		if(haversine(cartography[posi].edge.vertexes[0],
@@ -754,6 +763,11 @@ static bool pull(int * range, int r, int pos,double dist, Parcel * cartography) 
 	}
 	return false;
 }
+
+/**
+ * Checks if a position(index) given belongs to the given range,
+ * with r size.
+ */
 static bool belongsto(int * range, int r, int pos){
 	for(int i = 0; i< r; i++){
 		if(range[i] == pos)
@@ -762,30 +776,48 @@ static bool belongsto(int * range, int r, int pos){
 	return false;
 }
 
+/**
+ * Checks if the parcels on the positions given by outR are within
+ * distance dist of the parcels whose positions are in inRange.
+ */
 static int checkPull(int * inRange, int * outRange, int *out,
 		int* outR, double dist, Parcel* cartography, int * in){
 	int count = 0;
 	int added = 0;
 	for(int k = 0; k < *out; k++){
+		//checks only parcels of outR that are not inside inRange
 		if(!belongsto(inRange, *in, outR[k])){
+			//if they are within distance of any of the parcels inRange
+			//they are added to inRange
 			if(pull(inRange, *in, outR[k], dist, cartography)){
 				inRange[(*in)++] = outR[k];
 				added++;
 			} else {
+				//if not they are added to outRange;
 				outRange[count++] = outR[k];
 
 			}
 		}
 	}
+	//make out contain the number of indexes in outRange
 	*out = count;
 	return added;
 }
 
+/**
+ * Compares two ints given, 0 equal, > 0 if a > b and < 0 if a < b
+ */
 static int compareInt(const void *av, const void *bv)
 {
 	return *((int *)av)-*((int*)bv);
 }
 
+/**
+ * Given an index array this function splits it if there are parcels outside the distance dist
+ * printing the indexes of the parcels inside and returning the number of indexes of parcels that
+ * are outside the range (also inserting them into outRange).
+ * If there are no parcels outside the range it prints the indexes of the parcels inside.
+ */
 static int split(Parcel * cartography, int * start, int ns, int * outRange, double dist)
 {
 	int * inRange = malloc(ns*sizeof(int));
@@ -798,29 +830,37 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 		int posi= start[i];
 		for(int j = 0; j < ns; j++){
 			int posj= start[j];
-			double d = haversine(cartography[posi].edge.vertexes[0],
-					cartography[posj].edge.vertexes[0]);
-			//printf("dist %f, posi: % d posj: %d\n i: %d j: %d \n", d, posi, posj, i, j);
-			if(d <= dist){
+			//checks if the two parcels are less than dist apart
+			if(haversine(cartography[posi].edge.vertexes[0],
+					cartography[posj].edge.vertexes[0]) <= dist){
 				inRange[in++] = posj;
+				//inRange holds the indexes of the parcels less than dist apart
 			} else {
 				outR[out++] = posj;
+				//outR holds the indexes of the parcels more than dist apart
 			}
 
 		}
 		int added;
 		do {
+			//check if any of the parcels on OutR is less than dist apart from inRange
 			added = checkPull(inRange, outRange, &out, outR, dist, cartography, &in);
 		} while(added != 0);
+		//do while because we want to check until the number of added to inRange is 0
 
 		if(out != 0){
+			//if there are parcels at more than dist distance
 			qsort(inRange, in, sizeof(int), compareInt);
+			//we print the group that is inRange (less than dist)
 			printIndex(in, inRange);
 			free(inRange);
 			free(outR);
+			//return the number of parcels in outRange (more than dist)
 			return out;
 		}
 	}
+	//this part of the code happens when all the indexes given
+	// match parcels that are all within dist of each other
 	qsort(inRange, in, sizeof(int), compareInt);
 	printIndex(in, inRange);
 	free(inRange);
@@ -832,12 +872,15 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 static void commandPartition(double dist, Cartography cartography, int n)
 {
 	int * outRange = malloc(n*sizeof(int));
+	//make an array with all the indexes of the parcels
 	for(int i = 0; i<n; i++){
 		outRange[i]= i;
 	}
 	int count = n;
 	int flag;
 	do {
+		//call the function split until the int returned is 0
+		//(meaning there are no parcels out of the range dist to be evaluated.
 		flag = split(cartography, outRange, count, outRange, dist);
 		count = flag;
 	} while(flag);
