@@ -23,8 +23,10 @@ IDENTIFICAÇÃO DOS AUTORES
 
 COMENTÁRIO
 
- Coloque aqui a identificação do grupo, mais os seus comentários, como
- se pede no enunciado.
+ All functions have been implemented.
+ showStringVector was not used in our project so it's commented.
+ The less obvious functions include comments to explain them.
+ We chose to dynamically allocate memory and thus, defined USE_PTS.
 
 */
 #define USE_PTS		true
@@ -305,7 +307,7 @@ bool insideParcel(Coordinates c, Parcel p)
 }
 
 /**
- * Tests if Parcel a is inside Parcel b
+ * Tests if Parcel a is inside Parcel b but touching, i.e. one is the hole of the other
  */
 static bool parcelInsideParcel(Parcel *a, Parcel *b) {
 	int i;
@@ -318,7 +320,7 @@ static bool parcelInsideParcel(Parcel *a, Parcel *b) {
 }
 
 /*
- * Checks if Parcels a and b are nested i.e. one is inside the other
+ * Checks if Parcels a and b are nested i.e. one is inside the other but still touching
  * */
 static bool nestedParcels(Parcel *a, Parcel *b) {
 	return parcelInsideParcel(a, b) || parcelInsideParcel(b, a);
@@ -331,6 +333,7 @@ bool adjacentParcels(Parcel a, Parcel b)
 		return true;
 	}
 
+	// Will check if Parcels are inside each other, yet still touching
 	return nestedParcels(&a, &b);
 
 }
@@ -503,7 +506,7 @@ static void commandExtremes(Cartography cartography, int n)
 	showParcel(west, cartography[west], -'W');
 }
 
-
+// Print the length of the holes given in the array holes
 static void printHoles(Ring *holes, int n)
 {
 	int i;
@@ -678,32 +681,35 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 		return ;
 	}
 
-	// BFS
+	// Implemented using a BFS algorithm
+
+	// Make the queue, simplified by using two indexes in a standard array
 	int queue[n];
 	int add = 0, remove = 0;
 
-	// We add the starting node to the queue
+	// We add the starting node to the queue (enqueue)
 	queue[add++] = pos1;
 
+	// An array which holds the distances from the start
 	int distances[n];
 	// All distances start at -1 since they haven't been discovered yet
 	memset(distances, -1, n*sizeof(int));
-	// The distances from the start to itself is 0
+	// The distance from the start to itself is set to 0
 	distances[pos1] = 0;
 
-	// Make the queue
-
+	// While the queue is not empty
 	while(add != remove) {
 
+		// Pop an item from the queue
 		int v = queue[remove++];
 
 		// For each neighbor
 		for (int i = 0 ; i < n ; i++) {
-			// If adjacent
+			// If adjacent and not itself
 			if (v != i && adjacentParcels(cartography[v], cartography[i]))
 			{
 
-				// If we find it, end straight away
+				// If we find it, end straight away and print the distance
 				if (i == pos2) {
 					printf(" %d\n", distances[v] + 1);
 					return ;
@@ -711,7 +717,7 @@ static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n
 
 				// If it wasn't visited
 				if (distances[i] == -1) {
-					// Update its distance to start
+					// Update its distance to the start
 					distances[i] = 1 + distances[v];
 					// Add it to the queue
 					queue[add++] = i;
@@ -752,7 +758,7 @@ static void printIndex(int n, int *indexes)
  * Checks if the given parcel in pos is within range of any of the parcels
  * with indexes in inRange array.
  */
-static bool pull(int * rºange, int r, int pos, double dist, Parcel * cartography) {
+static bool pull(int * range, int r, int pos, double dist, Parcel * cartography) {
 	for(int i = 0 ; i<r; i++){
 		int posi = range[i];
 		if(haversine(cartography[posi].edge.vertexes[0],
@@ -785,21 +791,21 @@ static int checkPull(int * inRange, int * outRange, int *out,
 	int count = 0;
 	int added = 0;
 	for(int k = 0; k < *out; k++){
-		//checks only parcels of outR that are not inside inRange
+		// Checks only parcels of outR that are not inside inRange
 		if(!belongsto(inRange, *in, outR[k])){
-			//if they are within distance of any of the parcels inRange
-			//they are added to inRange
+			// Ff they are within distance of any of the parcels inRange
+			// They are added to inRange
 			if(pull(inRange, *in, outR[k], dist, cartography)){
 				inRange[(*in)++] = outR[k];
 				added++;
 			} else {
-				//if not they are added to outRange;
+				// If not they are added to outRange;
 				outRange[count++] = outR[k];
 
 			}
 		}
 	}
-	//make out contain the number of indexes in outRange
+	// Make out contain the number of indexes in outRange
 	*out = count;
 	return added;
 }
@@ -830,36 +836,36 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 		int posi= start[i];
 		for(int j = 0; j < ns; j++){
 			int posj= start[j];
-			//checks if the two parcels are less than dist apart
+			// Checks if the two parcels are less than dist apart
 			if(haversine(cartography[posi].edge.vertexes[0],
 					cartography[posj].edge.vertexes[0]) <= dist){
 				inRange[in++] = posj;
-				//inRange holds the indexes of the parcels less than dist apart
+				// inRange holds the indexes of the parcels less than dist apart
 			} else {
 				outR[out++] = posj;
-				//outR holds the indexes of the parcels more than dist apart
+				// outR holds the indexes of the parcels more than dist apart
 			}
 
 		}
 		int added;
 		do {
-			//check if any of the parcels on OutR is less than dist apart from inRange
+			// Check if any of the parcels on OutR is less than dist apart from inRange
 			added = checkPull(inRange, outRange, &out, outR, dist, cartography, &in);
 		} while(added != 0);
-		//do while because we want to check until the number of added to inRange is 0
+		// Do while because we want to check until the number of added to inRange is 0
 
 		if(out != 0){
-			//if there are parcels at more than dist distance
+			// If there are parcels at more than dist distance
 			qsort(inRange, in, sizeof(int), compareInt);
-			//we print the group that is inRange (less than dist)
+			// We print the group that is inRange (less than dist)
 			printIndex(in, inRange);
 			free(inRange);
 			free(outR);
-			//return the number of parcels in outRange (more than dist)
+			// Return the number of parcels in outRange (more than dist)
 			return out;
 		}
 	}
-	//this part of the code happens when all the indexes given
+	// This part of the code happens when all the indexes given
 	// match parcels that are all within dist of each other
 	qsort(inRange, in, sizeof(int), compareInt);
 	printIndex(in, inRange);
@@ -872,15 +878,15 @@ static int split(Parcel * cartography, int * start, int ns, int * outRange, doub
 static void commandPartition(double dist, Cartography cartography, int n)
 {
 	int * outRange = malloc(n*sizeof(int));
-	//make an array with all the indexes of the parcels
+	// Make an array with all the indexes of the parcels
 	for(int i = 0; i<n; i++){
 		outRange[i]= i;
 	}
 	int count = n;
 	int flag;
 	do {
-		//call the function split until the int returned is 0
-		//(meaning there are no parcels out of the range dist to be evaluated.
+		// Call the function split until the int returned is 0
+		// (meaning there are no parcels out of the range dist to be evaluated.
 		flag = split(cartography, outRange, count, outRange, dist);
 		count = flag;
 	} while(flag);
