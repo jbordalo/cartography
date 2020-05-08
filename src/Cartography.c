@@ -18,40 +18,47 @@ COMPILAÇÃO
 
 IDENTIFICAÇÃO DOS AUTORES
 
-  Aluno 1: número1 nome1
-  Aluno 2: número2 nome2
+  Aluno 1: 55075 Jacinta Sousa
+  Aluno 2: 55697 Joao Bordalo
 
 COMENTÁRIO
 
- Coloque aqui a identificação do grupo, mais os seus comentários, como
- se pede no enunciado.
+ All functions have been implemented.
+ showStringVector was not used in our project so it's commented.
+ The less obvious functions include comments to explain them.
+ We chose to dynamically allocate memory and thus, defined USE_PTS.
 
 */
-
+#define USE_PTS		true
 #include "Cartography.h"
+
+//#define max(a, b) ((a) > (b) ? (a) : (b))
+//#define min(a, b) ((a) > (b) ? (b) : (a))
 
 /* STRING -------------------------------------- */
 
-static void showStringVector(StringVector sv, int n) {
-	int i;
-	for( i = 0 ; i < n ; i++ ) {
-		printf("%s\n", sv[i]);
-	}
-}
+//static void showStringVector(StringVector sv, int n)
+//{
+//	int i;
+//	for (i = 0; i < n; i++)
+//	{
+//		printf("%s\n", sv[i]);
+//	}
+//}
 
 /* UTIL */
 
 static void error(String message)
 {
 	fprintf(stderr, "%s.\n", message);
-	exit(1);	// Termina imediatamente a execução do programa
+	exit(1); // Termina imediatamente a execução do programa
 }
 
-static void readLine(String line, FILE *f)	// lê uma linha que existe obrigatoriamente
+static void readLine(String line, FILE *f) // lê uma linha que existe obrigatoriamente
 {
-	if( fgets(line, MAX_STRING, f) == NULL )
+	if (fgets(line, MAX_STRING, f) == NULL)
 		error("Ficheiro invalido");
-	line[strlen(line) - 1] = '\0';	// elimina o '\n'
+	line[strlen(line) - 1] = '\0'; // elimina o '\n'
 }
 
 static int readInt(FILE *f)
@@ -62,7 +69,6 @@ static int readInt(FILE *f)
 	sscanf(line, "%d", &i);
 	return i;
 }
-
 
 /* IDENTIFICATION -------------------------------------- */
 
@@ -77,13 +83,13 @@ static Identification readIdentification(FILE *f)
 
 static void showIdentification(int pos, Identification id, int z)
 {
-	if( pos >= 0 ) // pas zero interpretado como não mostrar
+	if (pos >= 0) // pas zero interpretado como não mostrar
 		printf("%4d ", pos);
 	else
 		printf("%4s ", "");
-	if( z == 3 )
+	if (z == 3)
 		printf("%-25s %-13s %-22s", id.freguesia, id.concelho, id.distrito);
-	else if( z == 2 )
+	else if (z == 2)
 		printf("%-25s %-13s %-22s", "", id.concelho, id.distrito);
 	else
 		printf("%-25s %-13s %-22s", "", "", id.distrito);
@@ -91,7 +97,7 @@ static void showIdentification(int pos, Identification id, int z)
 
 static void showValue(int value)
 {
-	if( value < 0 ) // value negativo interpretado como char
+	if (value < 0) // value negativo interpretado como char
 		printf(" [%c]\n", -value);
 	else
 		printf(" [%3d]\n", value);
@@ -99,17 +105,16 @@ static void showValue(int value)
 
 static bool sameIdentification(Identification id1, Identification id2, int z)
 {
-	if( z == 3 )
+	if (z == 3)
 		return strcmp(id1.freguesia, id2.freguesia) == 0
-			&& strcmp(id1.concelho, id2.concelho) == 0
-			&& strcmp(id1.distrito, id2.distrito) == 0;
-	else if( z == 2 )
+				&& strcmp(id1.concelho, id2.concelho) == 0
+				&& strcmp(id1.distrito, id2.distrito) == 0;
+	else if (z == 2)
 		return strcmp(id1.concelho, id2.concelho) == 0
-			&& strcmp(id1.distrito, id2.distrito) == 0;
+				&& strcmp(id1.distrito, id2.distrito) == 0;
 	else
 		return strcmp(id1.distrito, id2.distrito) == 0;
 }
-
 
 /* COORDINATES -------------------------------------- */
 
@@ -151,67 +156,79 @@ double haversine(Coordinates c1, Coordinates c2)
 	return EARTH_RADIUS * (2 * asin(sqrt(a)));
 }
 
-
 /* RECTANGLE -------------------------------------- */
 
 Rectangle rect(Coordinates tl, Coordinates br)
 {
-	Rectangle rect = {tl, br};
-	return rect;
+	Rectangle r = {tl, br};
+	return r;
 }
 
 static void showRectangle(Rectangle r)
 {
 	printf("{%lf, %lf, %lf, %lf}",
-			r.topLeft.lat, r.topLeft.lon,
-			r.bottomRight.lat, r.bottomRight.lon);
+		   r.topLeft.lat, r.topLeft.lon,
+		   r.bottomRight.lat, r.bottomRight.lon);
 }
 
 static Rectangle calculateBoundingBox(Coordinates vs[], int n)
 {
-////// FAZER
-	return rect(coord(-9999,-9999), coord(9999,9999));
+
+	double xmin = 181, xmax = -181, ymin = 91, ymax = -91;
+	for (int i = 0; i < n; i++)
+	{
+		Coordinates c = vs[i];
+		xmin = fmin(xmin, c.lon);
+		xmax = fmax(xmax, c.lon);
+		ymin = fmin(ymin, c.lat);
+		ymax = fmax(ymax, c.lat);
+	}
+	return rect(coord(ymax, xmin), coord(ymin, xmax));
 }
 
 bool insideRectangle(Coordinates c, Rectangle r)
 {
-	////// FAZER
-		return false;
+	return (c.lat <= r.topLeft.lat && c.lat >= r.bottomRight.lat
+			&& c.lon >= r.topLeft.lon && c.lon <= r.bottomRight.lon);
 }
-
 
 /* RING -------------------------------------- */
 
 static Ring readRing(FILE *f)
 {
-	Ring r;
 	int i, n = readInt(f);
-	if( n > MAX_VERTEXES )
-		error("Anel demasiado extenso");
-	r.nVertexes = n;
-	for( i = 0 ; i < n ; i++ ) {
-		r.vertexes[i] = readCoordinates(f);
-	}
-	r.boundingBox =
-		calculateBoundingBox(r.vertexes, r.nVertexes);
-	return r;
-}
 
+	// Allocate size for the Ring
+	Ring *r = malloc(sizeof(Ring));
+
+	// Allocate size for the n vertexes of the Ring
+	r->vertexes = malloc(sizeof(Coordinates) * n);
+
+	r->nVertexes = n;
+	for (i = 0; i < n; i++)
+	{
+		r->vertexes[i] = readCoordinates(f);
+	}
+	r->boundingBox =
+		calculateBoundingBox(r->vertexes, r->nVertexes);
+	return *r;
+}
 
 // http://alienryderflex.com/polygon/
 bool insideRing(Coordinates c, Ring r)
 {
-	if( !insideRectangle(c, r.boundingBox) )	// otimização
+	if (!insideRectangle(c, r.boundingBox)) // otimização
 		return false;
 	double x = c.lon, y = c.lat;
 	int i, j;
 	bool oddNodes = false;
-	for( i = 0, j = r.nVertexes - 1 ; i < r.nVertexes ; j = i++ ) {
+	for (i = 0, j = r.nVertexes - 1; i < r.nVertexes; j = i++)
+	{
 		double xi = r.vertexes[i].lon, yi = r.vertexes[i].lat;
 		double xj = r.vertexes[j].lon, yj = r.vertexes[j].lat;
-		if( ((yi < y && y <= yj) || (yj < y && y <= yi))
-								&& (xi <= x || xj <= x) ) {
-			oddNodes ^= (xi + (y-yi)/(yj-yi) * (xj-xi)) < x;
+		if (((yi < y && y <= yj) || (yj < y && y <= yi)) && (xi <= x || xj <= x))
+		{
+			oddNodes ^= (xi + (y - yi) / (yj - yi) * (xj - xi)) < x;
 		}
 	}
 	return oddNodes;
@@ -219,26 +236,42 @@ bool insideRing(Coordinates c, Ring r)
 
 bool adjacentRings(Ring a, Ring b)
 {
-////// FAZER
+	////// FAZER
+	// Two Rings are adjacent if they share any vertexes
+	int i;
+	int j;
+	for (i = 0; i < a.nVertexes; i++)
+	{
+		for (j = 0; j < b.nVertexes; j++) {
+			if (sameCoordinates(a.vertexes[i], b.vertexes[j]))
+			{
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
-
 
 /* PARCEL -------------------------------------- */
 
 static Parcel readParcel(FILE *f)
 {
-	Parcel p;
-	p.identification = readIdentification(f);
+	// Allocate size for the Parcel
+	Parcel *p = malloc(sizeof(Parcel));
+	p->identification = readIdentification(f);
+
 	int i, n = readInt(f);
-	if( n > MAX_HOLES )
-		error("Poligono com demasiados buracos");
-	p.edge = readRing(f);
-	p.nHoles = n;
-	for( i = 0 ; i < n ; i++ ) {
-		p.holes[i] = readRing(f);
+
+	p->edge = readRing(f);
+	p->nHoles = n;
+	// Allocate size for the n rings of the hole
+	p->holes = malloc(sizeof(Ring) * n);
+	for (i = 0; i < n; i++)
+	{
+		p->holes[i] = readRing(f);
 	}
-	return p;
+	return *p;
 }
 
 static void showHeader(Identification id)
@@ -255,43 +288,88 @@ static void showParcel(int pos, Parcel p, int lenght)
 
 bool insideParcel(Coordinates c, Parcel p)
 {
-////// FAZER
+	////// FAZER
+	// A point is inside a parcel if it's inside the edge but outside the holes
+	if (insideRing(c, p.edge))
+	{
+		int i;
+		for (i = 0; i < p.nHoles; i++)
+		{
+			// If it's inside the hole then it's not inside the parcel
+			if (insideRing(c, p.holes[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 	return false;
+}
+
+/**
+ * Tests if Parcel a is inside Parcel b but touching, i.e. one is the hole of the other
+ */
+static bool parcelInsideParcel(Parcel *a, Parcel *b) {
+	int i;
+	for ( i = 0; i < b->nHoles ; i++) {
+		if (adjacentRings(a->edge, b->holes[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/*
+ * Checks if Parcels a and b are nested i.e. one is inside the other but still touching
+ * */
+static bool nestedParcels(Parcel *a, Parcel *b) {
+	return parcelInsideParcel(a, b) || parcelInsideParcel(b, a);
 }
 
 bool adjacentParcels(Parcel a, Parcel b)
 {
 	////// FAZER
-		return false;
-}
+	if (adjacentRings(a.edge, b.edge)) {
+		return true;
+	}
 
+	// Will check if Parcels are inside each other, yet still touching
+	return nestedParcels(&a, &b);
+
+}
 
 /* CARTOGRAPHY -------------------------------------- */
 
-int loadCartography(String fileName, Cartography cartography)
+int loadCartography(String fileName, Cartography *cartography)
 {
 	FILE *f;
 	int i;
 	f = fopen(fileName, "r");
 	if( f == NULL )
 		error("Impossivel abrir ficheiro");
-	int n = readInt(f);
-	if( n > MAX_PARCELS )
-		error("Demasiadas parcelas no ficheiro");
+
+	int n = readInt(f); // Number of parcels
+
+	// Cartography is a collection of parcels
+
+	// Allocate size for the n parcels
+	*cartography = malloc(sizeof(Parcel) * n);
+
 	for( i = 0 ; i < n ; i++ ) {
-		cartography[i] = readParcel(f);
+		(*cartography)[i] = readParcel(f);
 	}
 	fclose(f);
 	return n;
 }
 
-static int findLast(Cartography cartography, int n, int j, Identification id)
+static int findLast(Cartography cartography, int n, int j, Identification id, int idNumZ)
 {
-	for(  ; j < n ; j++ ) {
-		if( !sameIdentification(cartography[j].identification, id, 3) )
-			return j-1;
+	for (; j < n; j++)
+	{
+		if (!sameIdentification(cartography[j].identification, id, idNumZ))
+			return j - 1;
 	}
-	return n;
+	return n-1;
 }
 
 void showCartography(Cartography cartography, int n)
@@ -299,20 +377,21 @@ void showCartography(Cartography cartography, int n)
 	int last;
 	Identification header = {"___FREGUESIA___", "___CONCELHO___", "___DISTRITO___"};
 	showHeader(header);
-	for( int i = 0 ; i < n ; i = last + 1 ) {
-		last = findLast(cartography, n, i, cartography[i].identification);
+	for (int i = 0; i < n; i = last + 1)
+	{
+		last = findLast(cartography, n, i, cartography[i].identification, 3);
 		showParcel(i, cartography[i], last - i + 1);
 	}
 }
-
 
 /* INTERPRETER -------------------------------------- */
 
 static bool checkArgs(int arg)
 {
-	if( arg != -1 )
+	if (arg != -1)
 		return true;
-	else {
+	else
+	{
 		printf("ERRO: FALTAM ARGUMENTOS!\n");
 		return false;
 	}
@@ -320,9 +399,10 @@ static bool checkArgs(int arg)
 
 static bool checkPos(int pos, int n)
 {
-	if( 0 <= pos && pos < n )
+	if (0 <= pos && pos < n)
 		return true;
-	else {
+	else
+	{
 		printf("ERRO: POSICAO INEXISTENTE!\n");
 		return false;
 	}
@@ -334,39 +414,564 @@ static void commandListCartography(Cartography cartography, int n)
 	showCartography(cartography, n);
 }
 
+static int mVertexes(Parcel p)
+{
+	int n = 0;
+	n += p.edge.nVertexes;
+	for (int i = 0; i < p.nHoles; i++)
+		n += p.holes[i].nVertexes;
+	return n;
+}
+
+static int calculateLength(Cartography cartography, int pos, int n, int mode)
+{
+	Identification id = cartography[pos].identification;
+	int count = 1;
+	for (int i = pos + 1; i < n
+			&& sameIdentification(id, cartography[i].identification, mode); i++)
+		count++;
+	for (int i = pos - 1; i >= 0
+			&& sameIdentification(id, cartography[i].identification, mode); i--)
+		count++;
+	return count;
+}
+
 // M pos
 static void commandMaximum(int pos, Cartography cartography, int n)
 {
-	if( !checkArgs(pos) || !checkPos(pos, n) )
+	if (!checkArgs(pos) || !checkPos(pos, n))
 		return;
-	////// FAZER
+	int maxPos, max = 0;
+	Identification id = cartography[pos].identification;
+
+	for (maxPos = pos; maxPos > 0 &&
+					   sameIdentification(id, cartography[maxPos].identification, 3);
+		 maxPos--)
+		;
+	max = mVertexes(cartography[maxPos]);
+
+	for (int i = maxPos; i < n; i++)
+	{
+		Parcel p = cartography[i];
+		if (sameIdentification(id, p.identification, 3))
+		{
+			int v = mVertexes(p);
+			if (v > max)
+			{
+				max = v;
+				maxPos = i;
+			}
+		}
+		else
+			break;
+	}
+	showParcel(maxPos, cartography[maxPos], max);
+}
+
+static void maxPos(int *pos, int i, double *prevmax, double m)
+{
+	if (*prevmax < m)
+	{
+		*prevmax = m;
+		*pos = i;
+	}
+}
+
+static void minPos(int *pos, int i, double *prevmin, double m)
+{
+	if (*prevmin > m)
+	{
+		*prevmin = m;
+		*pos = i;
+	}
+}
+
+// X
+static void commandExtremes(Cartography cartography, int n)
+{
+	int north, south, west, east = 0;
+	double xmax = -180, ymax = -90, xmin = 180, ymin = 90;
+	for (int i = 0; i < n; i++)
+	{
+		Ring edge = cartography[i].edge;
+		Rectangle r = calculateBoundingBox(edge.vertexes, edge.nVertexes);
+		maxPos(&north, i, &ymax, r.topLeft.lat);
+		maxPos(&east, i, &xmax, r.bottomRight.lon);
+		minPos(&south, i, &ymin, r.bottomRight.lat);
+		minPos(&west, i, &xmin, r.topLeft.lon);
+	}
+	showParcel(north, cartography[north], -'N');
+	showParcel(east, cartography[east], -'E');
+	showParcel(south, cartography[south], -'S');
+	showParcel(west, cartography[west], -'W');
+}
+
+// Print the length of the holes given in the array holes
+static void printHoles(Ring *holes, int n)
+{
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		int nVert = (*(holes + i)).nVertexes;
+		printf("%d ", nVert);
+	}
+}
+
+// R pos
+static void commandResume(int pos, Cartography cartography, int n)
+{
+	if (!checkArgs(pos) || !checkPos(pos, n))
+		return;
+	Parcel p = cartography[pos];
+	Identification id = p.identification;
+	showIdentification(pos, id, 3);
+	printf("\n");
+	printf("%5s%d ", "", p.edge.nVertexes);
+	printHoles(p.holes, p.nHoles);
+	Rectangle boundingBox = p.edge.boundingBox;
+	showRectangle(boundingBox);
+	printf("\n");
+}
+
+// V lat lon pos
+static void commandTrip(double lat, double lon, int pos, Cartography cartography, int n)
+{
+	if (!checkArgs(pos) || !checkPos(pos, n)) //TODO check lat and lon
+		return;
+	Coordinates c = coord(lat, lon);
+	Coordinates *p = cartography[pos].edge.vertexes;
+	int num = cartography[pos].edge.nVertexes;
+	double minDist = haversine(c, *p);
+	for (p++; p < (cartography[pos].edge.vertexes + num); p++)
+	{
+		minDist = fmin(minDist, haversine(c, *p));
+	}
+	printf(" %f\n", minDist);
+}
+
+static void showHowMany(int pos, Cartography cartography, int n, int mode)
+{
+	showIdentification(pos, cartography[pos].identification, mode);
+	showValue(calculateLength(cartography, pos, n, mode));
+}
+
+// Q pos
+static void commandHowMany(int pos, Cartography cartography, int n)
+{
+	if (!checkArgs(pos) || !checkPos(pos, n))
+		return;
+	showHowMany(pos, cartography, n, 3);
+	showHowMany(pos, cartography, n, 2);
+	showHowMany(pos, cartography, n, 1);
+}
+
+static int compareStrings(const void *av, const void *bv) {
+	return strcmp(av, bv);
+}
+
+// C
+static void commandCounties(Cartography cartography, int n) {
+	// Allocate size for the copy
+	String *counties = malloc(sizeof(String) * n);
+
+	int count = 0;
+	int last;
+	// Copy each county without repeats onto the vector
+	for (int i = 0; i < n; i = last + 1)
+	{
+		last = findLast(cartography, n, i, cartography[i].identification, 2);
+		strcpy((char *) (counties+count++), cartography[i].identification.concelho);
+	}
+
+	// Sort the vector
+	qsort(counties, count, sizeof(String), compareStrings);
+
+	for ( int j = 0 ; j < count ; j ++ ) {
+		printf("%s\n", counties[j]);
+	}
+
+	free(counties);
+}
+
+// D
+static void commandDistricts(Cartography cartography, int n)
+{
+	// Allocate size for the copy
+	String *districts = malloc(sizeof(String) * n);
+
+	int count = 0;
+	int last;
+	// Copy each district without repeats onto the vector
+	for (int i = 0; i < n; i = last + 1)
+	{
+		last = findLast(cartography, n, i, cartography[i].identification, 1);
+		strcpy((char *) (districts+count++), cartography[i].identification.distrito);
+	}
+
+	// Sort the vector
+	qsort(districts, count, sizeof(String), compareStrings);
+
+	for (int j = 0 ; j < count ; j++) {
+		printf("%s\n", districts[j]);
+	}
+
+	free(districts);
+}
+
+/**
+ * Checks if the given coordinate is inside any Parcel of cartography.
+ */
+static int inParcel(double lat, double lon, Cartography cartography, int n)
+{
+	Coordinates c = coord(lat, lon);
+	for (int i = 0; i < n; i++)
+	{
+		if (insideParcel(c, cartography[i]))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+// P lat lon
+static void commandParcel(double lat, double lon, Cartography cartography, int n)
+{
+	int res = inParcel(lat, lon, cartography, n);
+	if (res == -1)
+	{
+		printf("FORA DO MAPA\n");
+	}
+	else
+	{
+		showIdentification(res, cartography[res].identification, 3);
+		printf("\n");
+	}
+}
+
+// A pos
+static void commandAdjacent(int pos, Cartography cartography, int n)
+{
+	if (!checkArgs(pos) || !checkPos(pos, n))
+		return ;
+
+	Parcel p = cartography[pos];
+	int emptyFlag = 1;
+	int i;
+	for (i = 0; i < n; i++) {
+		if (i != pos && adjacentParcels(p, cartography[i])) {
+			emptyFlag = 0;
+			showIdentification(i, cartography[i].identification, 3);
+			printf("\n");
+		}
+	}
+	if (emptyFlag) {
+		printf("NAO HA ADJACENCIAS\n");
+	}
+}
+
+// F pos1 pos2
+static void commandBoundaries(int pos1, int pos2, Cartography cartography, int n)
+{
+	if (!checkArgs(pos1) || !checkPos(pos1, n) || !checkArgs(pos2) || !checkPos(pos2, n))
+			return ;
+
+	if (pos1 == pos2) {
+		printf(" 0\n");
+		return ;
+	}
+
+	// Implemented using a BFS algorithm
+
+	// Make the queue, simplified by using two indexes in a standard array
+	int queue[n];
+	int add = 0, remove = 0;
+
+	// We add the starting node to the queue (enqueue)
+	queue[add++] = pos1;
+
+	// An array which holds the distances from the start
+	int distances[n];
+	// All distances start at -1 since they haven't been discovered yet
+	memset(distances, -1, n*sizeof(int));
+	// The distance from the start to itself is set to 0
+	distances[pos1] = 0;
+
+	// While the queue is not empty
+	while(add != remove) {
+
+		// Pop an item from the queue
+		int v = queue[remove++];
+
+		// For each neighbor
+		for (int i = 0 ; i < n ; i++) {
+			// If adjacent and not itself
+			if (v != i && adjacentParcels(cartography[v], cartography[i]))
+			{
+
+				// If we find it, end straight away and print the distance
+				if (i == pos2) {
+					printf(" %d\n", distances[v] + 1);
+					return ;
+				}
+
+				// If it wasn't visited
+				if (distances[i] == -1) {
+					// Update its distance to the start
+					distances[i] = 1 + distances[v];
+					// Add it to the queue
+					queue[add++] = i;
+				}
+			}
+		}
+	}
+
+	// If distances[pos2] was not updated to a number different than -1
+	// Then we haven't found it. The graph is not connected.
+	if (distances[pos2] == -1) {
+		printf("NAO HA CAMINHO\n");
+	}
+
+
+}
+
+/**
+ * Prints the indexes given in the array indexes (size n).
+ */
+static void printIndex(int n, int *indexes)
+{
+	printf(" ");
+	for(int i = 0; i < n; i++){
+		bool minimize = false;
+		printf("%d", indexes[i]);
+		while(i< n-1 && indexes[i+1] == indexes[i]+1){
+			i++;
+			minimize = true;
+		}
+		if (minimize) printf("-%d", indexes[i]);
+		if(i != n-1) printf(" ");
+	}
+	printf("\n");
+}
+
+/**
+ * Checks if the given parcel in pos is within range of any of the parcels
+ * with indexes in inRange array.
+ */
+static bool pull(int * range, int r, int pos, double dist, Parcel * cartography) {
+	for(int i = 0 ; i<r; i++){
+		int posi = range[i];
+		if(haversine(cartography[posi].edge.vertexes[0],
+					cartography[pos].edge.vertexes[0]) <= dist)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Checks if a position(index) given belongs to the given range,
+ * with r size.
+ */
+static bool belongsto(int * range, int r, int pos){
+	for(int i = 0; i< r; i++){
+		if(range[i] == pos)
+			return true;
+	}
+	return false;
+}
+
+/**
+ * Checks if the parcels on the positions given by outR are within
+ * distance dist of the parcels whose positions are in inRange.
+ */
+static int checkPull(int * inRange, int * outRange, int *out,
+		int* outR, double dist, Parcel* cartography, int * in){
+	int count = 0;
+	int added = 0;
+	for(int k = 0; k < *out; k++){
+		// Checks only parcels of outR that are not inside inRange
+		if(!belongsto(inRange, *in, outR[k])){
+			// Ff they are within distance of any of the parcels inRange
+			// They are added to inRange
+			if(pull(inRange, *in, outR[k], dist, cartography)){
+				inRange[(*in)++] = outR[k];
+				added++;
+			} else {
+				// If not they are added to outRange;
+				outRange[count++] = outR[k];
+
+			}
+		}
+	}
+	// Make out contain the number of indexes in outRange
+	*out = count;
+	return added;
+}
+
+/**
+ * Compares two ints given, 0 equal, > 0 if a > b and < 0 if a < b
+ */
+static int compareInt(const void *av, const void *bv)
+{
+	return *((int *)av)-*((int*)bv);
+}
+
+/**
+ * Given an index array this function splits it if there are parcels outside the distance dist
+ * printing the indexes of the parcels inside and returning the number of indexes of parcels that
+ * are outside the range (also inserting them into outRange).
+ * If there are no parcels outside the range it prints the indexes of the parcels inside.
+ */
+static int split(Parcel * cartography, int * start, int ns, int * outRange, double dist)
+{
+	int * inRange = malloc(ns*sizeof(int));
+	int * outR = malloc(ns* sizeof(int));
+	int in, out;
+	for(int i = 0; i < ns; i++)
+	{
+		in = 0;
+		out = 0;
+		int posi= start[i];
+		for(int j = 0; j < ns; j++){
+			int posj= start[j];
+			// Checks if the two parcels are less than dist apart
+			if(haversine(cartography[posi].edge.vertexes[0],
+					cartography[posj].edge.vertexes[0]) <= dist){
+				inRange[in++] = posj;
+				// inRange holds the indexes of the parcels less than dist apart
+			} else {
+				outR[out++] = posj;
+				// outR holds the indexes of the parcels more than dist apart
+			}
+
+		}
+		int added;
+		do {
+			// Check if any of the parcels on OutR is less than dist apart from inRange
+			added = checkPull(inRange, outRange, &out, outR, dist, cartography, &in);
+		} while(added != 0);
+		// Do while because we want to check until the number of added to inRange is 0
+
+		if(out != 0){
+			// If there are parcels at more than dist distance
+			qsort(inRange, in, sizeof(int), compareInt);
+			// We print the group that is inRange (less than dist)
+			printIndex(in, inRange);
+			free(inRange);
+			free(outR);
+			// Return the number of parcels in outRange (more than dist)
+			return out;
+		}
+	}
+	// This part of the code happens when all the indexes given
+	// match parcels that are all within dist of each other
+	qsort(inRange, in, sizeof(int), compareInt);
+	printIndex(in, inRange);
+	free(inRange);
+	free(outR);
+	return 0;
+}
+
+// T dist
+static void commandPartition(double dist, Cartography cartography, int n)
+{
+	int * outRange = malloc(n*sizeof(int));
+	// Make an array with all the indexes of the parcels
+	for(int i = 0; i<n; i++){
+		outRange[i]= i;
+	}
+	int count = n;
+	int flag;
+	do {
+		// Call the function split until the int returned is 0
+		// (meaning there are no parcels out of the range dist to be evaluated.
+		flag = split(cartography, outRange, count, outRange, dist);
+		count = flag;
+	} while(flag);
+	free(outRange);
 }
 
 void interpreter(Cartography cartography, int n)
 {
 	String commandLine;
-	for(;;) {	// ciclo infinito
+	for (;;)
+	{ // ciclo infinito
 		printf("> ");
 		readLine(commandLine, stdin);
 		char command = ' ';
 		double arg1 = -1.0, arg2 = -1.0, arg3 = -1.0;
 		sscanf(commandLine, "%c %lf %lf %lf", &command, &arg1, &arg2, &arg3);
 		// printf("%c %lf %lf %lf\n", command, arg1, arg2, arg3);
-		switch( commandLine[0] ) {
-			case 'L': case 'l':	// listar
-				commandListCartography(cartography, n);
-				break;
+		switch (commandLine[0])
+		{
+		case 'L':
+		case 'l': // listar
+			commandListCartography(cartography, n);
+			break;
 
-			case 'M': case 'm':	// maximo
-				commandMaximum(arg1, cartography, n);
-				break;
+		case 'M':
+		case 'm': // maximo
+			commandMaximum(arg1, cartography, n);
+			break;
 
-			case 'Z': case 'z':	// terminar
-				printf("Fim de execucao! Volte sempre.\n");
-				return;
+		case 'X':
+		case 'x': // extremos
+			commandExtremes(cartography, n);
+			break;
 
-			default:
-				printf("Comando desconhecido: \"%s\"\n", commandLine);
+		case 'R':
+		case 'r': // resumo
+			commandResume(arg1, cartography, n);
+			break;
+
+		case 'V':
+		case 'v': // viagem
+			commandTrip(arg1, arg2, arg3, cartography, n);
+			break;
+
+		case 'Q':
+		case 'q': // quantos
+			commandHowMany(arg1, cartography, n);
+			break;
+
+		case 'C':
+		case 'c': // concelhos
+			commandCounties(cartography, n);
+			break;
+
+		case 'D':
+		case 'd': // distritos
+			commandDistricts(cartography, n);
+			break;
+
+		case 'P':
+		case 'p': // parcela
+			commandParcel(arg1, arg2, cartography, n);
+			break;
+
+		case 'A':
+		case 'a': // adjacencias
+			commandAdjacent(arg1, cartography, n);
+			break;
+
+		case 'F':
+		case 'f': // fronteiras
+			commandBoundaries(arg1, arg2, cartography, n);
+			break;
+
+		case 'T':
+		case 't': // particao
+			commandPartition(arg1, cartography, n);
+			break;
+		case 'Z':
+		case 'z': // terminar
+			printf("Fim de execucao! Volte sempre.\n");
+			return;
+
+		default:
+			printf("Comando desconhecido: \"%s\"\n", commandLine);
 		}
 	}
 }

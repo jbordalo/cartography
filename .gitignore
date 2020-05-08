@@ -54,3 +54,8 @@ dkms.conf
 .settings/
 .project
 .cproject
+
+bin/
+/Debug/
+
+*.txt
